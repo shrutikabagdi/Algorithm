@@ -1,0 +1,923 @@
+Pre-Lab
+
+Aim: PRELAB – Write a Python Program to implement magic square.
+
+Theory:
+A magic square of order n is an arrangement of n2 numbers, usually distinct integers, in a square, such that the n numbers in all rows, all columns, and both diagonals sum to the same constant. A magic square contains the integers from 1 to n2.
+The constant sum in every row, column and diagonal are called the magic constant or magic sum, M. The magic constant of a normal magic square depends only on n and has the following value:
+M = n(n2+1)/2
+For normal magic squares of order n = 3, 4, 5, ...,
+The magic constants are: 15, 34, 65, 111, 175, 260, ...
+
+In any magic square, the first number i.e. 1 is stored at position (n/2, n-1). Let this position be (i,j). The next number is stored at position (i-1, j+1) where we can consider each row & column as circular array i.e. they wrap around.
+Three conditions hold:
+1. The position of next number is calculated by decrementing row number of the previous number by 1, and incrementing the column number of the previous number by 1. At any time, if the calculated row position becomes -1, it will wrap around to n-1. Similarly, if the calculated column position becomes n, it will wrap around to 0.
+2. If the magic square already contains a number at the calculated position, calculated column position will be decremented by 2, and calculated row position will be incremented by 1.
+3. If the calculated row position is -1 & calculated column position is n, the new position would be: (0, n-2).
+
+
+
+CODE:
+
+# Function to generate a Magic Square
+def generateSquare(n):
+    # 2-D array with all slots set to 0
+    magicSquare = [[0 for x in range(n)] for y in range(n)]
+    
+    # Initialize position of 1
+    """
+     0 0 0
+     0 0 1
+     0 0 0
+    """
+    i = n // 2
+    j = n - 1
+    
+    # Fill the square by placing values
+    num = 1
+    while num <= (n * n):
+        """
+              1
+        0 2 0
+        0 0 0
+        0 0 0
+        """
+        if i == -1 and j == n:  # 3rd condition
+            j = n - 2
+            i = 0
+        else:
+            """
+            2 0 0 1
+            2 0 0 1
+            2 0 0 1
+            """
+            # Next number goes out of right side of square
+            if j == n:
+                j = 0
+
+            """
+            1 1 1
+            0 0 0 
+            0 0 0 
+            2 2 2
+            """
+            # Next number goes out of upper side
+            if i < 0:
+                i = n - 1
+        
+        if magicSquare[i][j]:  # 2nd condition (agar 0 hoga to excute nahi hoga else me jayega)
+            j = j - 2
+            i = i + 1
+            continue #dekho idhar
+        else:
+            magicSquare[i][j] = num  #bas value add hogi aur dusri value pe kam chalu
+            num = num + 1
+        
+        """
+        0 0 0
+        0 2 0
+        1 0 0
+        """
+        j = j + 1
+        i = i - 1  # 1st condition
+    
+    # Printing the square
+    print("Magic Square for n =", n)
+    print("Sum of each row or column", n * (n * n + 1) // 2, "\n")
+    for i in range(0, n):
+        for j in range(0, n):
+            print('%2d ' % (magicSquare[i][j]), end='')
+            # To display output in matrix form
+            if j == n - 1:
+                print()
+
+# Driver Code
+# Works only when n is odd
+n = int(input("Enter the number [ODD] number of rows of the Magic Square: "))
+if n % 2 == 1:
+    generateSquare(n)
+else:
+    print("Please enter an odd number.")
+
+
+OUTPUT:
+
+Enter the number [ODD] number of rows of the Magic Square: 3
+Magic Square for n = 3
+Sum of each row or column 15 
+
+ 2  7  6 
+ 9  5  1 
+ 4  3  8 
+
+
+
+
+
+
+
+
+
+
+
+Practical 1
+
+AIM: Apply the concept of production rules to solve the water jug problem. (A Water Jug 
+Problem: You are given two jugs, a 4-gallon one and a 3-gallon one, a pump which has unlimited water which you can use to fill the jug, and the ground on which water may be poured. Neither jug has any measuring markings on it. How can you get exactly 2 gallons of water in the 4-gallon jug?) 
+
+THEORY: 
+The water jug problem is a classic puzzle in artificial intelligence and computer science that involves solving a problem related to filling and measuring water using two or more jugs of known capacities. This problem serves as an interesting and practical example of how AI algorithms can be applied to find solutions for real-world problems. 
+
+The basic setup of the water jug problem typically involves two or more jugs of different capacities, with the goal of measuring or obtaining a specific amount of water. Here's a common version of the problem using two jugs: 
+
+Problem Statement: 
+You are given two jugs with capacities A liters and B liters, where A and B are positive integers. The jugs have no markings to indicate their current level of water. You also have access to a water source and a sink. Your task is to measure exactly C liters of water, where C is a positive integer, using these jugs. 
+● You can perform the following operations: 
+● Fill a jug from the water source. 
+● Empty a jug into the sink. 
+Pour the water from one jug into the other until either the source jug is empty or the target jug is full. The objective is to find a series of operations that will result in having C liters of water in one of the jugs or determining that it is impossible to measure C liters with the given jugs and operations. In the water jug problem in Artificial Intelligence, we are provided with two jugs: one having the capacity to hold 3 gallons of water and the other has the capacity to hold 4 gallons of water. There is no other measuring equipment available and the jugs also do not have any kind of marking on them. 
+So, the agent’s task here is to fill the 4-gallon jug with 2 gallons of water by using only these two jugs and no other material. Initially, both our jugs are empty. 
+
+ 
+1. Approach BFS 
+Here, we keep exploring all the different valid cases of the states of water in the jug 
+simultaneously until and unless we reach the required target water. As provided in the problem statement, at any given state we can do either of the following operations: 
+● Fill a jug 
+● Empty a jug 
+● Transfer water from one jug to another until either of them gets completely filled or 
+empty. 
+ 
+2. Approach Memoization: 
+An approach using BFS has been discussed in the previous para. In this para an approach using memoization and recursion is been discussed. At any point, there can be a total of six possibilities: 
+● Empty the first jug completely 
+● Empty the second jug completely 
+● Fill the first jug 
+● Fill the second jug 
+● Fill the water from the second jug into the first jug until the first jug is full or the second jug has no water left 
+● Fill the water from the first jug into the second jug until the second jug is full or the first jug has no water left 
+
+3. Approach  Recursion :  
+Using Recursion, visit all the six possible moves one by one until one of them returns True. Since there can be repetitions of same recursive calls, hence every return value is stored using memoization to avoid calling the recursive function again and returning the stored value.  
+ 
+Time Complexity: O(n*m). 
+Space Complexity: O(n*m). Where n and m are the quantity of jug1 and jug2, respectively.
+
+CODE:
+
+from collections import deque
+
+def water_jug_problem():
+    jug1_capacity = 4
+    jug2_capacity = 3
+    target_amount = 2
+
+    # Initial state: (amount in jug1, amount in jug2)
+    initial_state = (0, 0)
+    
+    # Queue for BFS
+    queue = deque([(initial_state, [])])
+    
+    # Set to track visited states
+    visited = set()
+    
+    while queue:
+        (jug1, jug2), path = queue.popleft()
+        
+        # If the target amount is reached in jug1
+        if jug1 == target_amount:
+            return path + [(jug1, jug2)]
+        
+        # Skip already visited states
+        if (jug1, jug2) in visited:
+            continue
+        
+        visited.add((jug1, jug2))
+        
+        # List of possible next states
+        next_states = [
+            (jug1_capacity, jug2),                # Fill jug1
+            (jug1, jug2_capacity),                # Fill jug2
+            (0, jug2),                            # Empty jug1
+            (jug1, 0),                            # Empty jug2
+            (jug1 - min(jug1, jug2_capacity - jug2), jug2 + min(jug1, jug2_capacity - jug2)),  # Pour jug1 to jug2
+            (jug1 + min(jug2, jug1_capacity - jug1), jug2 - min(jug2, jug1_capacity - jug1))   # Pour jug2 to jug1
+        ]
+        
+        for state in next_states:
+            if state not in visited:
+                queue.append((state, path + [(jug1, jug2)]))
+    
+    return None
+
+solution = water_jug_problem()
+if solution:
+    for step in solution:
+        print(step)
+else:
+    print("No solution found.")
+
+
+OUTPUT:
+
+(0, 0)
+(4, 0)
+(1, 3)
+(1, 0)
+(0, 1)
+(4, 1)
+(2, 3)
+
+
+
+
+
+
+
+
+
+
+
+
+
+Practical 2
+
+Aim: Make use of A* Algorithm to find out goal state (Shortest path cost) in the given Graph. Make use of Breadth First Search algorithm to find the goal state in the above graph and compare the performance of both algorithms in terms of time taken.
+
+THEORY: 
+ 
+Many traditional search algorithms are used in AI applications. 
+The Search Algorithms Are Classified in Two Types: 
+Uninformed Search: Also called blind, exhaustive or brute-force search, it uses no information about the problem to guide the search and therefore may not be very efficient. 
+
+Informed Search: 
+Also called heuristic or intelligent search, this uses information about the problem to guide the search—usually guesses the distance to a goal state and is therefore efficient, but the search may not be always possible. 
+
+A* Search Algorithm: 
+A* search is the most commonly known form of best-first search. It uses heuristic function h(n), and cost to reach the node n from the start state. It has combined features of Uniform Cost Search and greedy best-first search, by which it solve the problem efficiently. A* search algorithm finds the shortest path through the search space using the heuristic function. This search algorithm expands less search tree and provides optimal result faster. A* algorithm is similar to UCS except that it uses g(n)+h(n) instead of g(n). 
+ 
+In A* search algorithm, we use search heuristic as well as the cost to reach the node. Hence we can combine both costs as following, and this sum is called as a fitness number. 
+
+Algorithm of A* Search: 
+Step1: Place the starting node in the OPEN list. 
+ 
+Step 2: Check if the OPEN list is empty or not, if the list is empty then return failure and stops. 
+ 
+Step 3: Select the node from the OPEN list which has the smallest value of evaluation function (g+h), if node n is goal node then return success and stop, otherwise 
+ 
+Step 4: Expand node n and generate all of its successors, and put n into the closed list. For each successor n', check whether n' is already in the OPEN or CLOSED list, if not then compute evaluation function for n' and place into Open list. 
+ 
+Step 5: Else if node n' is already in OPEN and CLOSED, then it should be attached to the back pointer which reflects the lowest g(n') value. 
+ 
+Step 6: Return to Step 2. 
+ 
+Advantages: 
+o A* search algorithm is the best algorithm than other search algorithms. 
+o A* search algorithm is optimal and complete. 
+o This algorithm can solve very complex problems. 
+ 
+Disadvantages: 
+o It does not always produce the shortest path as it mostly based on heuristics and 
+approximation. 
+o A* search algorithm has some complexity issues. 
+ 
+o The main drawback of A* is memory requirement as it keeps all generated nodes in the memory, so it is not practical for various large-scale problems. 
+
+CODE:
+
+""" Unidirectional """
+import queue
+
+class PriorityQueue:
+    def __init__(self):
+        self.queue = queue.PriorityQueue()
+
+    def push(self, item, priority):
+        self.queue.put((priority, item))
+
+    def pop(self):
+        _, item = self.queue.get()
+        return item
+
+    def is_empty(self):
+        return self.queue.empty()
+
+# Unidirectional graph representation
+graph = {
+    "S": [(1, "A"), (4, "B")],
+    "A": [(2, "B"),(12,"D")],
+    "B": [(2, "C")],
+    "C": [(3, "D")],
+    "D": []
+}
+
+heuristic_values = {
+    "S": 7,
+    "A": 6,
+    "B": 2,
+    "C": 1,
+    "D": 0
+}
+
+def a_star(graph, start, goal, heuristic):
+    open_list = PriorityQueue()
+    open_list.push(start, 0)
+    g_score = {node: float('inf') for node in graph.keys()}
+    g_score[start] = 0
+    f_score = {node: float('inf') for node in graph.keys()}
+    f_score[start] = heuristic[start]
+    came_from = {}
+
+    while not open_list.is_empty():
+        current = open_list.pop()
+
+        if current == goal:
+            return reconstruct_path(came_from, current)
+
+        for cost, neighbor in graph[current]:
+            tentative_g_score = g_score[current] + cost
+            if tentative_g_score < g_score[neighbor]:
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + heuristic[neighbor]
+                open_list.push(neighbor, f_score[neighbor])
+                came_from[neighbor] = current
+
+    return None
+
+def reconstruct_path(came_from, current):
+    path = [current]
+    while current in came_from:
+        current = came_from[current]
+        path.append(current)
+    path.reverse()
+    return path
+
+if __name__ == "__main__":
+    start_node = "S"
+    goal_node = "D"
+    path = a_star(graph, start_node, goal_node, heuristic_values)
+
+    if path:
+        print("Shortest path:", path)
+    else:
+        print("No path found.")
+
+
+OUTPUT:
+
+Shortest path: ['S', 'A', 'B', 'C', 'D']
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Practical 3
+
+Aim:- Build a Tic-Tac-Toe Game Engine with an AI Player in Python.
+
+THEORY: 
+ 
+Tic-tac-toe is a simple and popular two-player game where the objective is to get three of your symbols in a row on a 3x3 grid. The game is typically played with Xs and Os. Here’s how it works: 
+ 
+How to Play: 
+1. Players: Two players take turns, one playing as "X" and the other as "O." 
+2. Grid: The game board consists of a 3x3 grid. 
+3. Objective: The first player to place three of their marks (either Xs or Os) in a horizontal, vertical, or diagonal row wins the game. 
+4. Turns: Players take turns placing their mark in an empty square on the grid. 
+5. Winning: The game ends when one player gets three of their marks in a row or when all 
+squares are filled, resulting in a draw if no one has won. 
+
+Strategies: 
+● First move advantage: Going first can be an advantage if played strategically. 
+● Blocking: Always watch your opponent's moves and block them if they are about to get three in a row. 
+● Center square: The center square is often the best first move, as it provides more opportunities to win. 
+ 
+Rules of the Game 
+● The game is to be played between two people (in this program between HUMAN and 
+COMPUTER). 
+● One of the player chooses ‘O’ and the other ‘X’ to mark their respective cells. 
+● The game starts with one of the players and the game ends when one of the players has one whole row/ column/ diagonal filled with his/her respective character (‘O’ or ‘X’). 
+● If no one wins, then the game is said to be draw.
+
+ALGORITHM: 
+ 
+  Initialize the Game Board: 
+● Create a 3x3 grid (a 2D array or list of lists) filled with empty values. 
+
+  Display the Game Board: 
+● Create a function to print the current state of the grid to the console. 
+
+  Set the Players: 
+● Assign one player as "X" and the other as "O." 
+● Decide randomly or allow one player to choose who goes first. 
+
+  Main Game Loop:
+ Loop until the game ends (either a player wins or the grid is full): 
+1. Display the Board: 
+▪ Print the current state of the grid. 
+2. Player Input: 
+▪ Prompt the current player to select a row and column (1-3) for their move. 
+▪ Validate the input to ensure the chosen cell is empty and within bounds. 
+3. Update the Board: 
+▪ Place the current player’s symbol (X or O) in the selected cell. 
+4. Check for a Win: 
+▪ Create a function to check if the current player has won: 
+▪ Check all rows, columns, and both diagonals to see if any have three of the same symbols. 
+5. Check for a Draw: 
+▪ If the grid is full and no one has won, declare a draw. 
+6. Switch Players: 
+▪ Alternate between players (X -> O, O -> X). 
+
+End the Game: 
+● If a player wins, announce the winner. 
+● If the game ends in a draw, announce that the game is tied.
+
+Search Space: 
+Consider nodes (5)–(10) on the second level from the bottom. In nodes (7) and (9), the game is over, and Max wins with three X’s in a row. The value of these positions is +1. In the remaining nodes, (5), (6), (8), and (10), the game is also practically over, since Min only needs to place her O in the only remaining cell to win. In other words, we know how the game will end at each node on the second level from the bottom. We can therefore decide that the value of nodes (5), (6), (8), and (10) is also 1.
+
+
+CODE:
+
+board = ["-", "-", "-",
+         "-", "-", "-",
+         "-", "-", "-"]
+
+# Define a function to print the game board
+def print_board():
+    print(board[0] + " | " + board[1] + " | " + board[2])
+    print(board[3] + " | " + board[4] + " | " + board[5])
+    print(board[6] + " | " + board[7] + " | " + board[8])
+
+# Define a function to handle a player's turn
+def take_turn(player):
+    print(player + "'s turn.")
+    position = input("Choose a position from 1-9: ")
+    while position not in ["1", "2", "3", "4", "5", "6", "7", "8", "9"]:
+        position = input("Invalid input. Choose a position from 1-9: ")
+    position = int(position) - 1
+    while board[position] != "-":
+        position = int(input("Position already taken. Choose a different position: ")) - 1
+    board[position] = player
+    print_board()
+
+# Define a function to check if the game is over
+def check_game_over():
+    # Check for a win
+    if (board[0] == board[1] == board[2] != "-") or \
+       (board[3] == board[4] == board[5] != "-") or \
+       (board[6] == board[7] == board[8] != "-") or \
+       (board[0] == board[3] == board[6] != "-") or \
+       (board[1] == board[4] == board[7] != "-") or \
+       (board[2] == board[5] == board[8] != "-") or \
+       (board[0] == board[4] == board[8] != "-") or \
+       (board[2] == board[4] == board[6] != "-"):
+        return "win"
+    # Check for a tie
+    elif "-" not in board:
+        return "tie"
+    # Game is not over
+    else:
+        return "play"
+
+# Define the main game loop
+def play_game():
+    print_board()
+    current_player = "X"
+    game_over = False
+    while not game_over:
+        take_turn(current_player)
+        game_result = check_game_over()
+        if game_result == "win":
+            print(current_player + " wins!")
+            game_over = True
+        elif game_result == "tie":
+            print("It's a tie!")
+            game_over = True
+        else:
+            # Switch to the other player
+            current_player = "O" if current_player == "X" else "X"
+
+# Start the game
+play_game()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Practical 4
+
+Aim: Write a code to Implement Cryptarithmetic puzzle (SEND +  MORE=MONEY) using the concept of constraint satisfaction concept. 
+
+
+THEORY:  
+Finding a solution that meets a set of constraints is the goal of constraint satisfaction problems  (CSPs), a type of AI issue. Finding values for a group of variables that fulfill a set of restrictions or  rules is the aim of constraint satisfaction problems. For tasks including resource allocation, planning,  scheduling, and decision-making, CSPs are frequently employed in AI.  
+There are mainly three basic components in the constraint satisfaction problem: Variables: The things that need to be determined are variables. Variables in a CSP are the objects  that must have values assigned to them in order to satisfy a particular set of constraints. Boolean, integer, and categorical variables are just a few examples of the various types of variables Variables,  for instance, could stand in for the many puzzle cells that need to be filled with numbers in a sudoku  puzzle.
+  
+Domains: The range of potential values that a variable can have is represented by domains.  
+Depending on the issue, a domain may be finite or limitless. For instance, in Sudoku, the set of  numbers from 1 to 9 can serve as the domain of a variable representing a problem cell. Constraints: The guidelines that control how variables relate to one another are known as  constraints. Constraints in a CSP define the ranges of possible values for variables. Unary  constraints, binary constraints, and higher-order constraints are only a few examples of the various  sorts of constraints. For instance, in a sudoku problem, the restrictions might be that each row,  column, and 3×3 box can only have one instance of each number from 1 to 9. Constraint Satisfaction Problems (CSP) representation:  
+
+• The finite set of variables V1, V2, V3 ……………..Vn.  
+• Non-empty domain for every single variable D1, D2, D3 …………..Dn.  
+• The finite set of constraints C1, C2 …….…, Cm.  
+• where each constraint Ci restricts the possible values for variables,  
+• e.g., V1 ≠ V2  
+• Each constraint Ci is a pair <scope, relation>   
+• Example: <(V1, V2), V1 not equal to V2>  
+• Scope = set of variables that participate in constraint.  
+• Relation = list of valid variable value combinations.  
+• There might be a clear list of permitted combinations. Perhaps a relation that is abstract and that allows for membership testing and listing.  
+Constraint Satisfaction Problems (CSP) algorithms:  
+• The backtracking algorithm is a depth-first search algorithm that methodically  investigates the search space of potential solutions up until a solution is discovered that satisfies all the restrictions. The method begins by choosing a variable and giving it a  value before repeatedly attempting to give values to the other variables. The method  returns to the prior variable and tries a different value if at any time a variable cannot be  given a value that fulfills the requirements. Once all assignments have been tried or a  solution that satisfies all constraints has been discovered, the algorithm ends.  
+• The forward-checking algorithm is a variation of the backtracking algorithm that  condenses the 
+search space using a type of local consistency. For each unassigned  variable, the method keeps a list 
+of remaining values and applies local constraints to  eliminate inconsistent values from these sets. The algorithm examines a variable’s  neighbors after it is given a value to see whether any of its remaining values become  inconsistent and removes them from the sets if they do. The algorithm goes backward if,  after forward checking, a variable has no more values.  
+• Algorithms for propagating constraints are a class that uses local consistency and  inference to 
+condense the search space. These algorithms operate by propagating  restrictions between variables 
+and removing inconsistent values from the variable  domains using the information obtained.  
+
+
+CRYPTARITHMETIC PROBLEM  
+Cryptarithmetic Problem is a type of constraint satisfaction problem where the game is about digits  
+and its unique replacement either with alphabets or other symbols. In cryptarithmetic problem, the  
+digits (0-9) get substituted by some possible alphabets or symbols. The task in cryptarithmetic  problem  is to substitute each digit with an alphabet to get the result arithmetically correct.  
+We can perform all the arithmetic operations on a given cryptarithmetic problem. 
+
+The rules or constraints on a cryptarithmetic problem are as follows:  
+• There should be a unique digit to be replaced with a unique alphabet.  
+• The result should satisfy the predefined arithmetic rules, i.e., 2+2 =4, nothing else. 
+• Digits should be from 0-9 only.  
+• There should be only one carry forward, while performing the addition operation on a problem.  
+• The problem can be solved from both sides, i.e., lefthand side (L.H.S), or righthand side  (R.H.S)
+
+ 
+ALGORITHM:  
+• First, create a list of all the characters that need assigning to pass to Solve
+ • If all characters are assigned, return true if puzzle is solved, false otherwise 
+• Otherwise, consider the first unassigned character  
+• for (every possible choice among the digits not in use)  
+• If all digits have been tried and nothing worked, return false to trigger backtracking  .
+
+
+PSEUDOCODE, 
+in this case, has more special cases, but the same general design  
+• Start by examining the rightmost digit of the topmost row, with a carry of 0 
+• If we are beyond the leftmost digit of the puzzle, return true if no carry, false otherwise  
+• If we are currently trying to assign a char in one of the addends If char already assigned, just recur on the row beneath this one, adding value into the sum If not  assigned, then for (every possible  choice among the digits not in use) make that choice and  then on row beneath this one, if  successful, return true if !successful, unmake assignment and try another digit return false if no  assignment worked to trigger backtracking Else if trying to assign a char in the sum. 
+• If char assigned & matches correct, recur on next column to the left with carry, if  success 
+return true,  
+• If char assigned & doesn’t match, return false  
+• If char unassigned & correct digit already used, return false  
+• If char unassigned & correct digit unused, assign it and recur on next column to left  with carry, 
+if success return true  
+• return false to trigger backtracking .  
+ 
+
+CODE:
+def cryptoarithmatic():
+    for S in range(1, 10):
+        for E in range(10):
+            for N in range(10):
+                for D in range(10):
+                    for M in range(1, 10):
+                        for O in range(10):
+                            for R in range(10):
+                                for Y in range(10):
+                                    # Ensure that all digits are distinct
+                                    if len(set([S, E, N, D, M, O, R, Y])) == 8:
+                                        send = 1000 * S + 100 * E + 10 * N + D
+                                        more = 1000 * M + 100 * O + 10 * R + E
+                                        money = 10000 * M + 1000 * O + 100 * N + 10 * E + Y
+                                        
+                                        if send + more == money:
+                                            print(f"S = {S}, E = {E}, N = {N}, D = {D}")
+                                            print(f"M = {M}, O = {O}, R = {R}, E = {E}")
+                                            print(f"Y = {Y}")
+                                            print(f"SEND = {send}")
+                                            print(f"MORE = {more}")
+                                            print(f"MONEY = {money}")
+
+cryptoarithmatic()
+
+
+OUTPUT:
+
+S = 9, E = 5, N = 6, D = 7
+M = 1, O = 0, R = 8, E = 5
+Y = 2
+SEND = 9567
+MORE = 1085
+MONEY = 10652
+
+
+
+
+
+
+
+
+
+
+
+Practical 5
+
+Aim: Implement the concept of the Tower of Hanoi with 3 (A, B, and C) towers using 3 and 4 disks to reach the goal state (on the C tower) and show the production rules. 
+
+ 
+THEORY: 
+Tower of Hanoi is a mathematical puzzle where we have three rods (A, B, and C) and N disks. 
+Initially, all the disks are stacked in decreasing value of diameter i.e., the smallest disk is placed on the top and they are on rod A. The objective of the puzzle is to move the entire stack to another rod (here considered C), obeying the following simple rules: 
+● Only one disk can be moved at a time. 
+● Each move consists of taking the upper disk from one of the stacks and placing it on top of another stack i.e. a disk can only be moved if it is the uppermost disk on a stack. 
+● No disk may be placed on top of a smaller disk. 
+
+Tower of Hanoi using Recursion: 
+The idea is to use the helper node to reach the destination using recursion. Below is the pattern for this problem: 
+● Shift ‘N-1’ disks from ‘A’ to ‘B’, using C. 
+● Shift last disk from ‘A’ to ‘C’. 
+● Shift ‘N-1’ disks from ‘B’ to ‘C’, using A. 
+
+Follow the steps below to solve the problem: 
+● Create a function towerOfHanoi where pass the N (current number of  disk), from_rod, to_rod, aux_rod. 
+● Make a function call for N – 1 th disk. 
+● Then print the current the disk along with from_rod and to_rod ∙ Again make a function call for N – 1 th disk.
+
+APPLICATIONS OF TOWER OF HANOI: 
+Alzheimer’s disease
+Post-Traumatic Stress Disorder
+Emotional Intelligence
+Schizophrenia
+Cerebellar Atrophy
+
+ 
+STRENGTHS: 
+● The Tower of Hanoi is a simple mathematical puzzle that can easily assess the  problem-solving capabilities of an individual. 
+● It is a widely used tool for the evaluation of planning and working memory abilities. 
+● The Tower of Hanoi puzzle is sensitive to prefrontal damage and dysfunction. 
+● The puzzle’s difficulty level can easily be increased or decreased with additional disks  or pegs respectively. 
+ 
+LIMITATIONS: 
+● The Tower of Hanoi cannot be used standalone to understand and assess executive  functions of the brain. 
+● It can be difficult to employ individuals unable to cooperate with the process. 
+● Other factors such as sleep, anxiety, may also affect performance.
+
+
+PSEUDO CODE: 
+ 
+START 
+Procedure Hanoi(disk, source, dest, aux) 
+ 
+IF disk == 1, THEN 
+move disk from source to dest 
+ELSE 
+Hanoi(disk - 1, source, aux, dest) // Step 1 
+move disk from source to dest // Step 2 
+Hanoi(disk - 1, aux, dest, source) // Step 3 to 
+n END IF 
+ 
+END Procedure 
+STOP
+
+
+CODE:
+
+def hanoi(n, start, helper, end):
+    if n == 1:
+        print(f"Move disk 1 from {start} to {end}")
+        return
+    hanoi(n - 1, start, end, helper)
+    print(f"Move disk {n} from {start} to {end}")
+    hanoi(n - 1, helper, start, end)
+
+def main():
+    num_disks = int(input("Enter the number of disks: "))
+    print("Sequence of moves:")
+    hanoi(num_disks, 'A', 'B', 'C')  # A, B, and C are the names of the pegs
+
+if __name__ == "__main__":
+    main()
+
+OUTPUT:
+
+Enter the number of disks: 3
+Sequence of moves:
+Move disk 1 from A to C
+Move disk 2 from A to B
+Move disk 1 from C to B
+Move disk 3 from A to C
+Move disk 1 from B to A
+Move disk 2 from B to C
+Move disk 1 from A to C
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Practical 6
+
+Aim: Implement Bayes theorem for given data.
+
+THEORY:  
+Bayes theorem: - Bayes' Theorem states that the conditional probability of an event, based on  the occurrence of another event, is equal to the likelihood of the second event given the first event multiplied by the probability of the first event.  
+Bayes theorem is used to find the reverse probabilities if we know the conditional probability of  an event.  
+ Bayes’ Theorem states the following for any two events A and B:  
+P(A|B) = P(A)*P(B|A) / P (B)  
+ where:  
+∙ P(A|B): The probability of event A, given event B  has occurred.  
+∙ P(B|A): The probability of event B, given event A   has occurred.  
+∙ P(A): The probability of event A.  
+∙ P(B): The probability of event B.
+  
+For example, suppose the probability of the weather being cloudy is 40%.  Also suppose the probability of rain on a given day is 20%.  
+ Also suppose the probability of clouds on a rainy day is 85%.  
+ If it’s cloudy outside on a given day, what is the probability that it will rain that day?
+  
+Solution:  
+∙ P(cloudy) = 0.40  
+∙ P(rain) = 0.20  
+∙ P (cloudy | rain) = 0.85  
+∙ Thus, we can calculate:  
+∙ (rain | cloudy) = P(rain) * P (cloudy | rain) / P(cloudy)  
+∙ P (rain | cloudy) = 0.20 * 0.85 / 0.40  
+∙ P (rain | cloudy) = 0.425  
+∙ If it’s cloudy outside on a given day, the probability that it will rain that day is 42.5%. 
+
+
+CODE:
+
+def calculate_probability():
+    # Given probabilities
+    P_A1 = 5 / 365
+    P_A2 = 1 - P_A1
+    P_B_given_A1 = 0.9
+    P_B_given_A2 = 0.1
+
+    # Calculate P(B)
+    P_B = (P_A1 * P_B_given_A1) + (P_A2 * P_B_given_A2)
+
+    # Calculate P(A1|B) using Bayes' Theorem
+    P_A1_given_B = (P_A1 * P_B_given_A1) / P_B
+
+    return P_A1_given_B
+
+# Calculate and print the probability
+probability = calculate_probability()
+print(f"The probability that it will rain on the day of Marie's wedding is: {probability:.4f}")
+
+OUTPUT
+
+The probability that it will rain on the day of Marie's wedding is: 0.1111
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Practical 7
+
+Aim: Implementation of K-Means algorithm for machine learning (On the same sample data as in program 8.) compare it with decision tree.
+
+THEORY: 
+ 
+K-Means Algorithm: - 
+K-Means Clustering is an Unsupervised Learning algorithm, which groups the unlabelled dataset  into different clusters. Here K defines the number of pre-defined clusters that need to be created  in the process, as if K=2, there will be two clusters, and for K=3, there will be three clusters, and  so on. It allows us to cluster the data into different groups and a convenient way to discover the  categories of groups in the unlabelled dataset on its own without the need for any training. It is a  centroid-based algorithm, where each cluster is associated with a centroid. The main aim of this  algorithm is to minimize the sum of distances between the data point and their corresponding  clusters. 
+ 
+The algorithm takes the unlabelled dataset as input, divides the dataset into k-number of clusters, 
+and repeats the process until it does not find the best clusters. The value of k should be predetermined in this algorithm. 
+
+The k-means clustering algorithm mainly performs two tasks: 
+ 
+Determines the best value for K- center points or centroids by an iterative process. 
+ 
+Assigns each data point to its closest k-center. Those data points which are near to the  particular k-center, create a cluster.  
+Hence each cluster has datapoints with some commonalities, and it is away from other  clusters. 
+The below diagram explains the working of the K-means Clustering Algorithm: 
+
+How does the K-Means Algorithm Work? 
+ 
+The working of the K-Means algorithm is explained in the below steps: 
+ 
+Step-1: Select the number K to decide the number of clusters. 
+Step-2: Select random K points or centroids. (It can be other from the input dataset). 
+Step-3: Assign each data point to their closest centroid, which will form the predefined K clusters. 
+Step-4: Calculate the variance and place a new centroid of each cluster. 
+Step-5: Repeat the third steps, which means reassign each datapoint to the new closest  centroid of each cluster. 
+Step-6: If any reassignment occurs, then go to step-4 else go to FINISH. 
+Step-7: The model is ready. 
+
+Decision Tree is a supervised learning algorithm; k-means clustering is an unsupervised learning 
+algorithm.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Practical 8
+
+Aim: Implementation of decision tree for sample data. 
+
+THEORY: 
+ 
+Decision Tree is the most powerful and popular tool for classification and prediction. A decision tree is flowchart-like representation of data that graphically resembles a tree that has been drawn  upside down. In this analogy, the root of the tree is a decision that has to be made, the tree's  branches are actions that can be taken and the tree's leaves are potential decision outcomes. The purpose of a decision tree is to partition a large dataset into subsets that contain instances with 
+similar values in order to understand the likely outcomes of specific options.
+
+Important Terminology related to Decision Trees. 
+ 
+1. Root Node: It represents the entire population or sample and this further gets divided into two or more homogeneous sets. 
+2. Splitting: It is a process of dividing a node into two or more sub-nodes. 
+3. Decision Node: When a sub-node splits into further sub-nodes, then it is called the decision node. 
+4. Leaf / Terminal Node: Nodes that do not split are called Leaf or Terminal nodes. 
+5. Pruning: When we remove sub-nodes of a decision node, this process is called pruning. You can say the opposite process of splitting. 
+6. Branch / Sub-Tree: A subsection of the entire tree is called a branch or sub-tree. 
+7. Parent and Child Node: A node, which is divided into sub-nodes is called a parent node of sub-nodes whereas sub-nodes are the child of a parent node. 
+ 
+Advantages: 
+∙ Compared to other algorithms, decision trees requires less effort for data preparation during pre-processing. 
+∙ A decision tree does not require normalization of data. 
+∙ A decision tree does not require scaling of data as well. 
+∙ Missing values in the data also do NOT affect the process of building a decision tree to any considerable extent. 
+∙ A Decision tree model is very intuitive and easy to explain to technical teams as well as stakeholders. 
+ 
+Disadvantage: 
+ 
+∙ A small change in the data can cause a large change in the structure of the decision tree 
+causing instability. 
+∙ For a Decision tree sometimes, calculation can go far more complex compared to other 
+algorithms. 
+∙ Decision trees often involves higher time to train the model. 
+∙ Decision tree training is relatively expensive as the complexity and time taken are more. ∙ 
+The Decision Tree algorithm is inadequate for applying regression and predicting continuous 
+values. 
+
+
+CODE: 
+import pandas as pd 
+import matplotlib.pyplot as plt 
+data = pd.read_csv("Position_Salaries.csv") 
+import numpy as np 
+from sklearn.tree import  DecisionTreeRegressor 
+regressor = DecisionTreeRegressor(random_state=0) 
+X = data.iloc[ :,1:2].values       #feature selection 
+Y = data.iloc[ :,2].values 
+regressor.fit(X,Y) 
+pred = regressor.predict([[5],[6]]) 
+print(pred) 
+
+
+OUTPUT:
+
+ pred = regressor.predict([[5],[6]])        [110000. 150000.]
+
+ pred = regressor.predict([[6],[7]])         [150000. 200000.]
+ 
+
+
+
