@@ -1,0 +1,156 @@
+Aim: Identify the dataset problem statement and implement Recurrent Neural Network. 
+
+Theory:
+THEORY: 
+ 
+Recurrent Neural Network (RNN) is a type of Neural Network where the output from the previous step is 
+fed as input to the current step. In traditional neural networks, all the inputs and outputs are independent of 
+each other, but in cases when it is required to predict the next word of a sentence, the previous words are 
+required and hence there is a need to remember the previous words. Thus RNN came into existence, which 
+solved this issue with the help of a Hidden Layer. The main and most important feature of RNN is its 
+Hidden state, which remembers some information about a sequence. The state is also referred to as Memory 
+State since it remembers the previous input to the network. It uses the same parameters for each input as it 
+performs the same task on all the inputs or hidden layers to produce the output. This reduces the complexity 
+of parameters, unlike other neural network.  
+ 
+Architecture Of Recurrent Neural Network 
+RNNs have the same input and output architecture as any other deep neural architecture. However, 
+differences arise in the way information flows from input to output. Unlike Deep neural networks where we 
+have different weight matrices for each Dense network in RNN, the weight across the network remains 
+the same. It calculates state hidden state Hi for every input Xi . 
+By using the following formulas: h= σ(UX + Wh-1 + B) 
+Y = O(Vh + C) Hence 
+Y = f (X, h , W, U, V, B, C) 
+Here S is the State matrix which has element si as the state of the network at timestamp i. The parameters 
+in the network are W, U, V, c, b which are shared across timestamp. 
+ 
+How RNN works 
+The Recurrent Neural Network consists of multiple fixed activation function units, one for each time step. 
+Each unit has an internal state which is called the hidden state of the unit. This hidden state signifies the 
+past knowledge that the network currently holds at a given time step. This hidden state is updated at 
+every time step to signify the change in the knowledge of the network about the past. The hidden state is 
+updated using the following recurrence relation:- 
+The formula for calculating the current state: 
+ 
+where: 
+ht -> current state 
+ht-1 -> previous state 
+xt -> input state 
+Formula for applying Activation function(tanh): 
+ 
+where: 
+whh -> weight at recurrent neuron 
+wxh -> weight at input neuron 
+ 
+ 
+The formula for calculating output: 
+ 
+Yt -> output 
+Why -> weight at output layer 
+
+These parameters are updated using Backpropagation. However, since RNN works on sequential data 
+here we use an updated backpropagation which is known as Backpropagation through time. 
+
+Backpropagation Through Time (BPTT) 
+In RNN the neural network is in an ordered fashion and since in the ordered network each variable is 
+computed one at a time in a specified order like first h1 then h2 then h3 so on. Hence we will apply 
+backpropagation throughout all these hidden time states 
+sequentially. 
+ 
+
+L(θ)(loss function) depends on h3 
+h3 in turn depends on h2 and W 
+h2 in turn depends on h1 and W 
+h1 in turn depends on h0 and W 
+where h0 is a constant starting state. 
+ 
+Training through RNN 
+1. A single-time step of the input is provided to the network. 
+2. Then calculate its current state using a set of current input and the previous state. 
+3. The current ht becomes ht-1 for the next time step. 
+4. One can go as many time steps according to the problem and join the information from all the 
+previous states. 
+5. Once all the time steps are completed the final current state is used to calculate the output. 
+6. The output is then compared to the actual output i.e the target output and the error is 
+generated. 
+7. The error is then back-propagated to the network to update the weights and hence the network 
+(RNN) is trained using Backpropagation through time. 
+
+Advantages: 
+1. An RNN remembers each and every piece of information through time. It is useful in time 
+series prediction only because of the feature to remember previous inputs as well. This is 
+called Long Short Term Memory. 
+2. Recurrent neural networks are even used with convolutional layers to extend the effective 
+pixel neighborhood. 
+
+Disadvantages: 
+1. Gradient vanishing and exploding problems. 
+2. Training an RNN is a very difficult task. 
+3. It cannot process very long sequences if using tanh or relu as an activation function. 
+
+Applications: 
+1. Language Modelling and Generating Text 
+2. Speech Recognition 
+3. Machine Translation 
+4. Image Recognition, Face detection 
+5. Time series Forecasting 
+
+
+Types Of RNN: 
+There are four types of RNNs based on the number of inputs and outputs in the network. 
+1. One to One 
+2. One to Many 
+3. Many to One 
+4. Many to Many
+
+
+
+CODE:
+
+ 
+import numpy as np  
+import matplotlib.pyplot as plt  
+import tensorflow as tf  
+from tensorflow.keras import layers, models  
+ 
+# Generate sine wave data 
+timesteps = np.linspace(0, 100, 1000) 
+data = np.sin(timesteps) 
+print(data.shape) 
+ 
+# Prepare sequences (look back = 10 time steps) 
+look_back = 10 
+x, y = [], [] 
+for i in range(len(data) - look_back): 
+    x.append(data[i:i+look_back]) 
+    y.append(data[i+look_back]) 
+x, y = np.array(x), np.array(y) 
+print("x:", x.shape) 
+ 
+ 
+print("y:", y.shape) 
+ 
+# Reshape for RNN (samples, timesteps, features) 
+# RNN expects input shape = (samples, time steps, features). 
+x = x.reshape(x.shape[0], x.shape[1], 1) 
+print("x shape:", x.shape) # (990, 10, 1) 
+print("y shape:", y.shape) 
+ 
+model = models.Sequential([ 
+    layers.SimpleRNN(50, activation="tanh", input_shape=(look_back, 1)), 
+    layers.Dense(1) # Regression output 
+]) 
+ 
+model.compile(optimizer="adam", loss="mse") 
+model.summary() 
+ 
+history = model.fit(x, y, epochs=20, batch_size=32, verbose=1)  
+ 
+# Predict using the same dataset 
+y_pred =  model.predict(x) 
+# Plot results 
+plt.figure(figsize=(10,6)) 
+plt.plot(timesteps [look_back:], y, label="True Values") 
+plt.plot(timesteps [look_back:], y_pred, label="Predicted Values") 
+plt.legend() 
+plt.show() 

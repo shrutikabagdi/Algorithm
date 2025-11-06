@@ -1,0 +1,111 @@
+Aim: Perform and implement Convolution Neural Network for diabetic dataset. 
+
+THEORY: 
+An introductory look at Convolutional Neural Network with theory and code example. I want to write about 
+one of the most important neural networks used in the field of deep learning, especially for image 
+recognition and natural language processing: convolutional neural network, also called “CNN” or 
+“ConvNet”. 
+
+What is Convolutional neural network? 
+Convolutional neural networks. Sounds like a weird combination of biology and math with a little CS 
+sprinkled in, but these networks have been some of the most influential innovations in the field of computer 
+vision. 2012 was the first year that neural nets grew to prominence as Alex Krizhevsky used them to win 
+that year’s ImageNet competition (basically, the annual Olympics of computer vision), dropping the 
+classification error record from 26% to 15%, an astounding improvement at the time. Ever since then, a 
+host of companies have been using deep learning at the core of their services. Facebook uses neural nets for 
+their automatic tagging algorithms, Google for their photo search, Amazon for their product 
+recommendations, Pinterest for their home feed personalization, and Instagram for their search 
+infrastructure. 
+
+Architecture of a Traditional CNN 
+A convolutional neural network is composed of at least 3 layers: 
+• A convolution layer to perform convolution operations and to generate many feature maps from one 
+image; 
+• A pooling layer to denoise the feature maps by shrinking non-overlapping submatrices into summary statistics (such as maximums). 
+• A dense layer which is a usual (shallow/deep) neural network that takes flattened inputs. 
+ 
+ 
+Working of Convolutional Neural Networks. 
+
+Convolutional neural networks are based on neuroscience findings. They are made of layers of 
+artificial neurons called nodes. These nodes are functions that calculate the weighted sum of the inputs and 
+return an activation map. This is the convolution part of the neural network. 
+Each node in a layer is defined by its weight values. When you give a layer some data, like an image, it 
+takes the pixel values and picks out some of the visual features. 
+
+When you're working with data in a CNN, each layer returns activation maps. These maps point out 
+important features in the data set. If you gave the CNN an image, it'll point out features based on pixel 
+values, like colors, and give you an activation function. 
+Usually with images, a CNN will initially find the edges of the picture. Then this slight definition of the 
+image will get passed to the next layer. Then that layer will start detecting things like corners and color 
+groups. Then that image definition will get passed to the next layer and the cycle continues until a 
+prediction is made. 
+
+As the layers get more defined, this is called max pooling. It only returns the most relevant features 
+from the layer in the activation map. This is what gets passed to each successive layer until you get the final 
+layer. The last layer of a CNN is the classification layer which determines the predicted value based on the 
+activation map. If you pass a handwriting sample to a CNN, the classification layer will tell you what letter 
+is in the image. This is what autonomous vehicles use to determine whether an object is another car, a 
+person, or some other obstacle. 
+Training a CNN is similar to training many other machine learning algorithms. You'll start with some 
+training data that is separate from your test data and you'll tune your weights based on the accuracy of the 
+predicted values. Just be careful that you don't overfit your model. 
+
+Different types of CNN 
+• 1D CNN: With these, the CNN kernel moves in one direction. 1D CNNs are usually used on time- 
+series data. 
+• 2D CNN: These kinds of CNN kernels move in two directions. You'll see these used with image 
+labelling and processing. 
+• 3D CNN: This kind of CNN has a kernel that moves in three directions. With this type of CNN,
+researchers use them on 3D images like CT scans and MRIs. 
+
+
+CODE:
+
+
+from google.colab import drive 
+drive.mount('/content/drive') 
+path="/content/drive/MyDrive/Deep Learning/Practical 5/diabetes - diabetes.csv" 
+import numpy as np 
+import pandas as pd 
+df=pd.read_csv(path) 
+df.head(5) 
+df.shape 
+df.isnull().sum() 
+df.info() 
+df.describe() 
+df.tail() 
+X = df.drop('Outcome', axis=1).values 
+y = df['Outcome'].values 
+from sklearn.model_selection import train_test_split 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) 
+from sklearn.preprocessing import StandardScaler 
+scaler = StandardScaler() 
+X_train = scaler.fit_transform(X_train) 
+X_test = scaler.transform(X_test) 
+X_train = X_train.reshape(X_train.shape[0], X_train.shape[1], 1) 
+X_test = X_test.reshape(X_test.shape[0], X_test.shape[1], 1) 
+print("Train shape", X_train.shape) 
+print("Test shape", X_test.shape) 
+from keras.models import Sequential 
+from keras.layers import Conv1D, MaxPooling1D, Flatten, Dense, Dropout 
+model = Sequential([ 
+    Conv1D(32, kernel_size=2, activation='relu', input_shape=(X_train.shape[1], 1)),  
+    MaxPooling1D(pool_size=2), 
+    Conv1D(64, kernel_size=3, activation='relu'), 
+    Flatten(), 
+    Dense(64, activation='relu'), 
+    Dropout(0.5), 
+    Dense(1, activation='sigmoid') 
+]) 
+# Compile 
+model.compile(optimizer='adam', 
+              loss='binary_crossentropy', 
+              metrics=['accuracy']) 
+# Train 
+history = model.fit(X_train, y_train, epochs=30, batch_size=32, 
+                    validation_data=(X_test, y_test), verbose=1) 
+# Evaluate 
+loss, acc = model.evaluate(X_test, y_test, verbose=0) 
+print('Test loss:', loss) 
+print('Test accuracy:', acc) 

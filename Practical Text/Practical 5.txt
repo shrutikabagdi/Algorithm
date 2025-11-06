@@ -1,0 +1,101 @@
+Aim: Apply the knowledge and implemenr feedforward Neural Network.
+
+Theory:
+
+Feed forward neural network
+
+Feed forward neural networks are artificial neural networks in which nodes do not form loops. This type of neural network is also known as a multi-layer neural network as all information is only passed forward.
+
+During data flow, input nodes receive data, which travel through hidden layers, and exit output nodes. No links exist in the network that could get used to by sending information back from the output node.
+
+A feed forward neural network approximates functions in the following way:
+An algorithm calculates classifiers by using the formula *y = f(x)**.
+Input x is therefore assigned to category y.
+According to the feed forward model, y = f(x; θ). This value determines the closest approximation of the function.
+
+Working principle of a feed forward neural network
+
+Input layer: The neurons of this layer receive input and pass it on to the other layers of the network. Feature or attribute numbers in the dataset must match the number of neurons in the input layer.
+
+Output layer: According to the type of model getting built, this layer represents the forecasted feature.
+
+Hidden layer: Input and output layers get separated by hidden layers. Depending on the type of model, there may be several hidden layers.
+
+There are several neurons in hidden layers that transform the input before actually transferring it to the next layer. This network gets constantly updated with weights in order to make it easier to predict.
+
+Neuron weights: Neurons get connected by a weight, which measures their strength or magnitude. Similar to linear regression coefficients, input weights can also get compared.
+
+Weight is normally between 0 and 1, with a value between 0 and 1.
+
+Neurons: Artificial neurons get used in feed forward networks, which later get adapted from biological neurons. A neural network consists of artificial neurons.
+
+Neurons function in two ways:
+
+    First, they create weighted input sums, and
+    Second, they activate the sums to make them normal.
+
+Activation functions can either be linear or nonlinear. Neurons have weights based on their inputs. During the learning phase, the network studies these weights.
+
+Activation Function: Neurons are responsible for making decisions in this area.
+
+According to the activation function, the neurons determine whether to make a linear or nonlinear decision. Since it passes through so many layers, it prevents the cascading effect from increasing neuron outputs.
+
+
+An activation function can be classified into three major categories: sigmoid, Tanh, and Rectified Linear Unit (ReLu).
+
+Sigmoid: Input values between 0 and 1 get mapped to the output values.
+Tanh: A value between -1 and 1 gets mapped to the input values.
+Rectified Linear Unit: Only positive values are allowed to flow through this function. Negative values get mapped to 0.
+
+Advantages of feed forward Neural Networks
+
+Machine learning can be boosted with feed forward neural networks' simplified architecture.
+Multi-network in the feed forward networks operate independently, with a moderated intermediary.
+Complex tasks need several neurons in the network.
+Neural networks can handle and process nonlinear data easily compared to perceptrons and sigmoid neurons, which are otherwise complex.
+A neural network deals with the complicated problem of decision boundaries.
+Depending on the data, the neural network architecture can vary. For example, convolutional neural networks (CNNs) perform exceptionally well in image processing, whereas recurrent neural networks (RNNs) perform well in text and voice processing.
+Neural networks need graphics processing units (GPUs) to handle large datasets for massive computational and hardware performance. Several GPUs get used widely in the market, including Kaggle Notebooks and Google Collab Notebooks.
+
+Applications of feed forward neural networks
+Physiological feed forward system
+Gene regulation and feed forward
+Automation and machine management
+Derivative feed forward network
+
+
+
+CODE:
+
+from google.colab import drive 
+drive.mount('/content/drive') 
+path="/content/drive/MyDrive/Deep Learning/Practical 5/diabetes - diabetes.csv" 
+import numpy as np 
+import pandas as pd 
+df=pd.read_csv(path) 
+df.head(5) 
+df.shape 
+df.isnull().sum() 
+df.info() 
+df.describe() 
+df.tail() 
+X = df.drop('Outcome', axis=1) 
+y = df['Outcome'] 
+from sklearn.model_selection import train_test_split 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42) 
+from sklearn.preprocessing import StandardScaler 
+scaler = StandardScaler() 
+X_train_scaled = scaler.fit_transform(X_train) 
+X_test_scaled = scaler.transform(X_test) 
+from tensorflow.keras.models import Sequential 
+from tensorflow.keras.layers import Dense 
+model = Sequential() 
+model.add(Dense(16, activation='relu', input_shape=(X_train.shape[1],))) 
+model.add(Dense(12, activation='relu')) 
+model.add(Dense(1, activation='sigmoid')) 
+model.compile(optimizer='adam', loss='binary_crossentropy', metrics=['accuracy']) 
+epochs = 50 
+history = model.fit(X_train, y_train, epochs=epochs, batch_size=32, validation_split=0.2) 
+loss, accuracy = model.evaluate(X_test, y_test, verbose=0) 
+print(f'Test Loss: {loss:.4f}') 
+print(f'Test Accuracy: {accuracy:.4f}')
