@@ -1,0 +1,155 @@
+Aim: Develop Lucas-Kanade method for optical flow detection by fing 
+points to traverse over a moving object. 
+
+THEORY: 
+ 
+Object tracking is the ability of a computer or a system to follow and understand the movement of a 
+single object as it navigates through the chaos of the world. This is crucial in many real-world 
+scenarios as there are multiple objects and movements occurring simultaneously. 
+ 
+Why to Use Optical Flow? 
+Optical flow is based on the principle of analyzing motion in a video at a pixel-level. It computes 
+the change in position of a pixel coordinates with respect to time to perceive the sense of direction 
+and speed of the moving object. 
+ 
+1. Detecting Movement: Optical flow helps us detect movement in the video. It notices that 
+pixels in the video are changing from one frame to the next, indicating that something is in 
+motion. 
+2. Quantifying Motion: It not only identifies movement but also quantifies it. For instance, it 
+can tell that the pixels at the front of the car are moving faster than those at the back, 
+suggesting that the car is moving forward. 
+3. Direction and Speed: Optical flow provides information about the direction of movement. 
+In our example, it reveals that the car is moving from left to right. Additionally, it can estimate 
+the speed of the movement. 
+4. Pixel-Level Understanding: It works at a pixel level, meaning it’s not just recognizing that 
+the overall scene is changing, but it can pinpoint specific pixels (or points) and tell how they 
+are moving.
+
+Syntax: cv2.calcOpticalFlowPyrLK(prevImg, nextImg, prevPts, nextPts[, winSize[, maxLevel[, 
+criteria]]])  
+Parameters:  
+prevImg – first 8-bit input image  
+nextImg – second input image  
+prevPts – vector of 2D points for which the flow needs to be found.  
+winSize – size of the search window at each pyramid level.  
+maxLevel – 0-based maximal pyramid level number; if set to 0, pyramids are not used (single 
+level), if set to 1, two levels are used, and so on.  
+criteria – parameter, specifying the termination criteria of the iterative search algorithm.  
+Return:  
+nextPts – output vector of 2D points (with single-precision floating-point coordinates) containing 
+the calculated new positions of input features in the second image; when 
+OPTFLOW_USE_INITIAL_FLOW flag is passed, the vector must have the same size as in the 
+input.  
+status – output status vector (of unsigned chars); each element of the vector is set to 1 if the flow 
+for the corresponding features has been found, otherwise, it is set to 0.  
+err – output vector of errors; each element of the vector is set to an error for the corresponding 
+feature, type of the error measure can be set in flags parameter; if the flow wasn’t found then the 
+error is not defined (use the status parameter to find such cases). 
+❖ Lucas-Kanade Algorithm 
+The Lucas-Kanade Method stands out as one of the widely used approaches for calculating Optical 
+Flow. It works on two basic assumptions to calculate the values of u and v in the Optical Flow 
+equation: 
+1. Flow is smooth locally. It means that the motion of objects or points in a small, localized region 
+of an image is relatively consistent and does not exhibit sudden or abrupt changes. 
+2. Neighboring pixels have the same displacement. In other words, neighboring pixels in the 
+selected region are assumed to have similar motion, allowing the algorithm to represent the overall 
+motion with a single vector. 
+Let’s assume that we have a 5*5 image patch which gives us 25 Optical Flow equations 
+corresponding to 25 pixels in the image. These equations can be represented in Matrix Form: 
+Press enter or click to view image in full size 
+
+
+
+
+Code:
+
+import cv2
+import numpy as np
+
+# ----------------------------
+# Parameters
+# ----------------------------
+# Shi-Tomasi corner detection parameters
+feature_params = dict(maxCorners=200,
+                      qualityLevel=0.01,
+                      minDistance=7,
+                      blockSize=7)
+
+# Lucas-Kanade optical flow parameters
+lk_params = dict(winSize=(21, 21),
+                 maxLevel=3,
+                 criteria=(cv2.TERM_CRITERIA_EPS | cv2.TERM_CRITERIA_COUNT, 30, 0.01))
+
+# Random colors for drawing
+color = np.random.randint(0, 255, (200, 3))
+
+# ----------------------------
+# Video Capture (change source as needed)
+# ----------------------------
+# For webcam use: cap = cv2.VideoCapture(0)
+cap = cv2.VideoCapture("Demo.mp4")   # Replace with your video file name
+
+if not cap.isOpened():
+    print("Error: Could not open video.")
+    exit()
+
+# Take first frame and find corners in it
+ret, old_frame = cap.read()
+if not ret:
+    print("Error: Cannot read video file.")
+    exit()
+
+old_gray = cv2.cvtColor(old_frame, cv2.COLOR_BGR2GRAY)
+p0 = cv2.goodFeaturesToTrack(old_gray, mask=None, **feature_params)
+
+# Create a mask image for drawing (same size as frame)
+mask = np.zeros_like(old_frame)
+
+# ----------------------------
+# Processing Loop
+# ----------------------------
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        print("End of video stream.")
+        break
+
+    frame_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Calculate optical flow
+    p1, st, err = cv2.calcOpticalFlowPyrLK(old_gray, frame_gray, p0, None, **lk_params)
+
+    if p1 is not None:
+        good_new = p1[st == 1]
+        good_old = p0[st == 1]
+
+        # Draw tracks
+        for i, (new, old) in enumerate(zip(good_new, good_old)):
+            a, b = new.ravel()
+            c, d = old.ravel()
+            mask = cv2.line(mask, (int(a), int(b)), (int(c), int(d)), color[i].tolist(), 2)
+            frame = cv2.circle(frame, (int(a), int(b)), 5, color[i].tolist(), -1)
+
+        img = cv2.add(frame, mask)
+        cv2.imshow('Lucas-Kanade Optical Flow', img)
+
+        # Update previous frame and points
+        old_gray = frame_gray.copy()
+        p0 = good_new.reshape(-1, 1, 2)
+    else:
+        # No points detected, re-detect
+        p0 = cv2.goodFeaturesToTrack(frame_gray, mask=None, **feature_params)
+        old_gray = frame_gray.copy()
+        mask = np.zeros_like(frame)
+
+    # Exit on ESC key
+    key = cv2.waitKey(30) & 0xFF
+    if key == 27:
+        break
+
+# ----------------------------
+# Cleanup
+# ----------------------------
+cap.release()
+cv2.destroyAllWindows()
+

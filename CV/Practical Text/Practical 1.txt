@@ -1,0 +1,92 @@
+AIM: Prelab-1. Introduction to Python 2. Installation of IDE PYCHARM, JUPITER 3. 
+Installation of library OpenCV, NumPy, pandas, Scikit-learn, matplotlib.
+
+
+THEORY: 
+ 
+Python: is a general-purpose interpreted, interactive, object-oriented, and high-level 
+programming language. It was created by “Guido van Rossum” during 1985- 1990. Python source 
+code is also available under the GNU General Public License (GPL). Python is designed to be 
+highly readable. It uses English keywords frequently whereas other languages use punctuation, 
+and it has fewer syntactic constructions than other languages. 
+ 
+Installing python: 
+• Open a Web browser and go to https://www.python.org/downloads/. 
+• Follow the link for the Windows installer python-XYZ.msi file where XYZ is the version 
+you need to install. 
+• To use this installer python-XYZ.msi, the Windows system must support Microsoft Installer 
+2.0. Save the installer file to your local machine and then run it to find out if your machine 
+supports MSI. 
+• Run the downloaded file. This brings up the Python install wizard, which is really easy to 
+use. Just accept the default settings, wait until the install is finished, and you are done. 
+ 
+IDEs, Editors & online platform for Python: 
+An IDE, or Integrated Development Environment, enables programmers to consolidate the 
+different aspects of writing computer program. IDEs increase programmer productivity by 
+combining common activities of writing software into a single application: editing source code, 
+building executable, and debugging. 
+Following IDEs/Editors/Online platform can be used for python programming:
+IDLE, PyCharm, Spyder, Jupyter, VS Code, PyDev, Eclipse, Netbeans, Cloud9, PyScriptor, 
+Sublime Text3, Notepad++, Atom, Thonny, Wing, Eric, IntelliJ IDEA, Google Co-lab. 
+ 
+Python libraries commonly used for machine learning tasks: 
+NumPy: NumPy is a fundamental library for scientific computing in Python. It provides support 
+for multidimensional arrays, mathematical functions, random number generators, and more. 
+ 
+Pandas: Pandas is a powerful library for data manipulation and analysis in Python. It provides 
+support for data structures such as Series and Data Frame, and includes tools for data cleaning, 
+merging, reshaping, and more. 
+ 
+Scikit-learn: Scikit-learn is a machine learning library that provides a wide range of tools for 
+classification, regression, clustering, and more. It includes algorithms for feature selection, model 
+selection, and evaluation, as well as utilities for data preprocessing and transformation. 
+ 
+Matplotlib: Matplotlib is a popular library for data visualization in Python. It provides support 
+for various types of plots, including line plots, scatter plots, histograms, and more. 
+ 
+OpenCV: OpenCV (Open-Source Computer Vision Library) is an open-source computer vision 
+and machine learning software library. It provides a comprehensive set of tools and functions for 
+tasks related to computer vision, image processing, and machine learning. It includes image and 
+video I/O, image processing functions, feature detection, object recognition, facial recognition, 
+camera calibration, machine learning algorithms, and more. 
+OpenCV plays a crucial role in fields such as robotics, surveillance, autonomous vehicles, medical 
+imaging, and augmented reality, among others.
+
+
+
+
+
+
+Code:
+
+//image
+
+import cv2
+img = cv2.imread("D:\\PyCharm\\Practical 1\\Tomato Photo.jpg")
+cv2.imshow('image',img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+
+// Video
+
+import cv2
+def read_video(video_path):
+    cap = cv2.VideoCapture(video_path)
+    if not cap.isOpened():
+        print("Error opening video file")
+        return
+    while True:
+        ret, frame = cap.read()
+        if not ret:
+            print("End of video or error reading frame")
+            break
+        cv2.imshow('Video',frame)
+        if cv2.waitKey(25) & 0xFF ==ord('q'):
+            break
+    cap.release()
+    cv2.destroyAllWindows()
+if __name__ == "__main__":
+    video_file = 'D:\PyCharm\Practical 1\Rose Video.mp4'
+    read_video(video_file)

@@ -1,0 +1,124 @@
+Aim: Develop programs to apply the following 2-D transformation 
+operation on the image. 
+1. Translation 2. Rotation 3. Scaling 4. Shearing 5. Reflection.
+
+
+THEORY:
+1. Translation 
+  Translation is the shifting of object’s location. If you know the shift in (x,y) direction, let it 
+be, you can create the transformation matrix as follows.
+
+2. Rotation  
+This technique rotates an image by a specified angle and by the given axis or point. The 
+points that lie outside the boundary of an output image are ignored. 
+Rotation about the origin by an angle Θ is given by
+
+
+3. Scaling 
+Scaling means resizing an image which means an image is made bigger or smaller in x/y 
+direction. We can resize an image in terms of scaling factor, 
+
+
+4. Shearing 
+Shearing an image means shifting the pixel value either horizontally or vertically. Basically 
+this shits some part of an image to one direction and other part to the other direction. 
+Horizontal shearing will shift the upper part to the right and lower part to the left. 
+ Here you can see in gif. That upper part has shifted to the right and the lower part of the left. 
+ 
+
+5. Reflection 
+Image reflection is used to flip the image vertically or horizontally. For reflection along the 
+x-axis, we set the value of Sy to -1, Sx to 1, and vice-versa for the y-axis reflection.
+
+
+
+Code:
+
+#Translation
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+img=cv2.imread("D:\PyCharm\Practical 4\Ice Cream.jpg")
+cv2.imshow('original img',img)
+
+rows,cols=img.shape[:2]
+translation_matrix = np.float32([[1,0,80],[0,1,140]])
+img_translation=cv2.warpAffine(img,translation_matrix,(cols+70, rows+110))
+
+cv2.imshow('img', img_translation)
+cv2.waitKey(0)
+cv2.destroyAllWindows() 
+
+
+
+# Rotation
+import cv2
+import numpy as np
+
+img=cv2.imread("D:\PyCharm\Practical 4\Ice Cream.jpg")
+cv2.imshow('Original img', img)
+height,width=img.shape[:2]
+center=(width/2,height/2)
+
+rotate_matrix=cv2.getRotationMatrix2D(center=center, angle=-45,scale=1)
+rotated_img=cv2.warpAffine(src=img, M=rotate_matrix, dsize=(width, height))
+
+cv2.imshow('The Rotated Image is', rotated_img)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+
+# Scaling
+import cv2
+
+img=cv2.imread("D:\PyCharm\Practical 4\Ice Cream.jpg")
+cv2.imshow('img', img)
+
+img_scaled=cv2.resize(img, None, fx=1.8, fy=1.8, interpolation=cv2.INTER_LINEAR)
+
+cv2.imshow('Scaled img', img_scaled)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+
+# Shearing
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+img=cv2.imread("D:\PyCharm\Practical 4\Ice Cream.jpg")
+cv2.imshow('img', img)
+rows, cols, din=img.shape
+
+#shearing applied to X-axis
+M=np.float32([[1,0.5,0],[0,1,0],[0,0,1]])
+sheared_img=cv2.warpPerspective(img,M,(int(cols*1.5),int(rows*1.5)))
+plt.axis('off')
+plt.imshow(sheared_img)
+plt.show()
+
+
+
+#Reflection
+import cv2
+import numpy as np
+import matplotlib.pyplot as plt
+
+img = cv2.imread("D:\PyCharm\Practical 4\Ice Cream.jpg")
+cv2.imshow('Original Image', img)
+
+# Reflect horizontally
+horizontal_reflection = cv2.flip(img, 1)
+cv2.imshow('Horizontally Flipped', horizontal_reflection)
+
+# Reflect vertically
+vertical_reflection = cv2.flip(img, 0)
+cv2.imshow('Vertically Flipped', vertical_reflection)
+
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+

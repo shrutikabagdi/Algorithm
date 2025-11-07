@@ -1,0 +1,100 @@
+Aim: To understand the basic concepts of digital image processing and 
+demonstrate the ability to read and write images using the OpenCV library 
+in Python.
+
+THEORY: 
+Digital Image Processing: 
+Digital Image Processing means processing digital images by means of a digital computer. We can 
+also say that it is a use of computer algorithms, in order to get enhanced images to extract some 
+useful information. 
+ Image processing is the process of transforming an image into a digital form and performing certain 
+operations to get some useful information from it. The image processing system usually treats all 
+images as 2D signals when applying certain predetermined signal processing methods. An image is 
+defined as a two-dimensional function,F(x,y), where x and y are spatial coordinates, and the 
+amplitude of F at any pair of coordinates (x,y) is called the intensity of that image at that point. When 
+x,y, and amplitude values of F are finite, we call it a digital image. In other words, an image can be 
+defined by a two-dimensional array specifically arranged in rows and columns. 
+
+ 1.Image acquisition: This involves capturing an image using a digital camera or scanner, or 
+importing an existing image into a computer. It could be as simple as being given an image which is 
+in digital form 
+
+2.Image enhancement: This involves improving the visual quality of an image, such as increasing 
+contrast, reducing noise, and removing artefacts. It is amongst the simplest and most appealing in 
+areas of Image Processing it is also used to extract some hidden details from an image and is 
+subjective. 
+
+3.Image restoration: This involves removing degradation from an image, such as blurring, noise, 
+and distortion.It also deals with appealing of an image but it is objective(Restoration is based on 
+mathematical or probabilistic model or image degradation). 
+
+ 4.Image segmentation: This involves dividing an image into regions or segments, each of which 
+corresponds to a specific object or feature in the image.It includes partitioning an image into its 
+constituent parts or objects. Autonomous segmentation is the most difficult task in Image Processing. 
+
+5.Image Compression :Image compression is a process applied to a graphics file to minimise its 
+size in bytes without degrading image quality below an acceptable threshold. By reducing the file 
+size, more images can be stored in a given amount of disk or memory space. The image also requires 
+less bandwidth when being transmitted over the internet or downloaded from a webpage, reducing 
+network congestion and speeding up content delivery. 
+
+6.  Image Recognition : Image recognition is the process of identifying an object or a feature in an 
+image or video. It is used in many applications like defect detection, medical imaging, and security 
+surveillance 
+
+ 7. Image Noising and Denoising: Image denoising plays an important role in modern image 
+processing systems. Image denoising is to remove noise from a noisy image, so as to restore the true 
+image. 
+
+
+
+
+
+CODE:
+
+Write a program to read and write the image using imread, imshow ,imwrite function of 
+opencv library to store image in computer. 
+
+
+import cv2
+def read_write_img(img_path, out_path):
+    img = cv2.imread(img_path)
+    if img is None:
+        print("error")
+        return
+    cv2.imshow("original img", img)
+    key = cv2.waitKey(0)
+    if key == ord('s'):
+        cv2.imwrite(out_path, img)
+    else:
+        print("Error")
+img_path = "D:\\PyCharm\\Practical 2\\Car.jpeg"
+out_path = "D:\\PyCharm\\Practical 2\\Car_Modified.jpeg"
+read_write_img(img_path, out_path)
+
+
+Write a program to read and resize the image and store it using imwrite function.
+
+
+import cv2
+
+def read_resize_img(img_path, out_path, new_width, new_height):
+    img = cv2.imread(img_path)
+
+    if img is None:
+        print("error")
+        return
+    cv2.imshow("original img", img)
+    resized_img = cv2.resize(img,(new_width, new_height), interpolation=cv2.INTER_AREA)
+
+    key = cv2.waitKey(0)
+
+    if key == ord('s'):
+        cv2.imwrite(out_path, resized_img)
+    else:
+        print("Error")
+
+img_path = "D:\\PyCharm\\Practical 2\\Car_Modified.jpeg"
+out_path = "D:\\PyCharm\\Practical 2\\Car_Resized.jpeg"
+
+read_resize_img(img_path, out_path, 500 , 300 )
