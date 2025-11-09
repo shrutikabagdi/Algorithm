@@ -1,0 +1,37 @@
+Aim: Split dataset for Testing and Training a model and print size of it.
+
+THEORY: 
+You are given a dataset – “housing.csv.” Load the dataset into a DataFrame. Considering the 
+“median_house_value” column as output/target and the rest of the columns as input, perform the 
+following tasks:
+ 
+1. Find the number of null values in each column and replace them with the mean values 
+2. Split the data into test and train fragments using train_test_split() function in 80:20 ratio 
+(80% train, 20% test) 
+3. Print the size of test and train data (For both input and output)
+
+
+
+
+
+
+Code:
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+iris = load_iris()
+
+X = iris.data      # All feature columns (sepal length, sepal width, petal length, petal width)
+y = iris.target    # Target variable (species)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+print(f"Training set size: {X_train.shape[0]} samples")
+print(f"Testing set size: {X_test.shape[0]} samples")
+
+
+
+output:
+
+Training set size: 105 samples
+Testing set size: 45 samples

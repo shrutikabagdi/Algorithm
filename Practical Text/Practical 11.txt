@@ -1,0 +1,78 @@
+Aim: Recommendation System: Create a popularity based 
+recommender system at a genre level. User will input a genre (g), 
+minimum ratings threshold (t) for a movie and no. of 
+recommendations(N) for which it should be recommended top N 
+movies which are most popular within that genre (g) ordered by ratings 
+in descending order where each movie has at least (t) reviews.
+
+
+THEORY: 
+ 
+When we provide ratings for products and services on the internet, all the preferences we 
+express and data we share (explicitly or not), are used to generate recommendations by 
+recommender systems. The most common examples are that of Amazon, Google and Netflix. 
+There are generally two types of Recommendation Systems- 
+ 
+1. Content-Based Recommendation System- 
+ 
+A Content-Based Recommender System is one that follows a content-based filtration method 
+to generate recommendations to the user. Content-Based filtration is mainly focused on 
+recommending similar products to the user based on their history. 
+2. Collaborative Recommendation System- 
+ 
+A Collaborative Recommender System, on the other hand, does not take an individual user at 
+a time but a cluster of similar or alike users (here, users with almost likely taste in movies), 
+and based on those users’ ratings, recommends similar products to those group or cluster of 
+users.
+
+
+
+
+
+CODE: 
+ 
+from google.colab import drive 
+drive.mount('/content/drive') 
+ 
+import pandas as pd  
+movies_file = '/content/drive/MyDrive/Natural Language Processing (NLP)/Practical 
+11/movies.csv'  
+ratings_file = '/content/drive/MyDrive/Natural Language Processing (NLP)/Practical 
+11/ratings.csv'  
+movies_df = pd.read_csv(movies_file)  
+ratings_df = pd.read_csv(ratings_file)  
+  
+def recommend_movies_by_popularity(genre, min_ratings, top_n):  
+    genre_movies = movies_df[movies_df['genres'].str.contains(genre, case=False, na=False)]  
+    movie_ratings = pd.merge(genre_movies, ratings_df, on='movieId', how='inner')  
+    movie_stats = movie_ratings.groupby('movieId').agg(  
+        avg_rating=('rating', 'mean'),  
+        num_reviews=('rating', 'count')  
+    ).reset_index()  
+    filtered_movies = movie_stats[movie_stats['num_reviews'] >= min_ratings]  
+    top_movies = filtered_movies.sort_values(by='avg_rating', ascending=False)  
+    top_movies = top_movies.head(top_n)  
+    recommended_movies = pd.merge(top_movies, genre_movies[['movieId', 'title']],  
+on='movieId', how='left')  
+    return recommended_movies[['title', 'avg_rating', 'num_reviews']]  
+  
+genre_input = 'Action'  
+min_ratings_input = 50  
+top_n_input=int(input("Enter the number of top movie required"))  
+recommendations = recommend_movies_by_popularity(genre_input, min_ratings_input,  
+top_n_input)  
+recommendation  
+
+
+
+
+output:
+
+Enter the number of top movie required 6
+title	avg_rating	num_reviews
+0	Princess Mononoke (Mononoke-hime) (1997)	4.384615	52
+1	North by Northwest (1959)	4.273973	73
+2	Matrix, The (1999)	4.264368	261
+3	Star Wars: Episode V - The Empire Strikes Back...	4.228070	228
+4	Seven Samurai (Shichinin no samurai) (1954)	4.217742	62
+5	Raiders of the Lost Ark (Indiana Jones and the...	4.212054	224

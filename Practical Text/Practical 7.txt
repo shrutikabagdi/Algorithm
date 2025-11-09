@@ -1,0 +1,142 @@
+Aim: Apply Text processing, tokenization on given text file & create 
+bigram, and trigram. 
+
+
+ 
+THEORY: 
+ 
+Tokenization is essentially splitting a phrase, sentence, paragraph, or an entire text document into 
+smaller units, such as individual words or terms. Each of these smaller units are called tokens. 
+These tokens help in understanding the context or developing the model for the NLP. The 
+tokenization helps in interpreting the meaning of the text by analyzing the sequence of the words. 
+For example, the text “It is raining” can be tokenized into ‘It’, ‘is’, ‘raining 
+There are different methods and libraries available to perform tokenization. NLTK, Gensim, Keras 
+are some of the libraries that can be used to accomplish the task. Tokenization can be done to either 
+separate words or sentences. If the text is split into words using some separation technique it is 
+called word tokenization and same separation done for sentences is called sentence 
+tokenization. 
+ 
+Purpose: 
+Tokenization is performed on the corpus to obtain tokens. The tokens are then used to prepare a 
+vocabulary. Vocabulary refers to the set of unique tokens in the corpus. Remember that vocabulary 
+can be constructed by considering each unique token in the corpus or by considering the top K 
+Frequently Occurring Words. 
+
+Steps: 
+ 
+1. Load the demotext.txt text file into a variable and then close the file 
+2. Do word wise tokenization list out generated tokens 
+3. Transform each token into a small case 
+4. Remove stop words from the generated token list 
+5. Remove extra symbols like commas, full stops, and question marks using a regular 
+expression tokenizer and store them in another variable 
+6. Do bigram and trigram for generated tokens 
+
+
+
+
+
+
+
+Code:
+ 
+from google.colab import drive 
+drive.mount('/content/drive') 
+import nltk 
+import re 
+from nltk.corpus import stopwords 
+from nltk.util import ngrams 
+ 
+# Download required NLTK data 
+nltk.download('punkt') 
+nltk.download('stopwords') 
+nltk.download('punkt_tab') 
+
+
+o:
+
+[nltk_data] Downloading package punkt to /root/nltk_data...
+[nltk_data]   Package punkt is already up-to-date!
+[nltk_data] Downloading package stopwords to /root/nltk_data...
+[nltk_data]   Package stopwords is already up-to-date!
+[nltk_data] Downloading package punkt_tab to /root/nltk_data...
+[nltk_data]   Unzipping tokenizers/punkt_tab.zip.
+True
+ 
+# 1. Load the file into a variable 
+with open(r"/demotext.txt", "r", encoding="utf-8-sig") as file: 
+    text = file.read() 
+print("Original Text:\n", text) 
+
+
+
+o:
+
+Original Text:
+ What is Lorem Ipsum?
+
+
+Lorem Ipsum is simply dummy text of the printing and 
+typesetting industry. Lorem Ipsum has been the industry's 
+standard dummy text ever since the 1500s, when an unknown 
+printer took a galley of type and scrambled it to make a 
+type specimen book. It has survived not only five centuries, 
+but also the leap into electronic typesetting, 
+remaining essentially unchanged. 
+
+
+It was popularised in the 1960s with the release of Letraset 
+sheets containing Lorem Ipsum passages, and more recently 
+with desktop publishing software like Aldus PageMaker 
+including versions of Lorem Ipsum.
+
+ 
+# 2. Word-wise tokenization 
+tokens = nltk.word_tokenize(text) 
+print("Original Tokens:", tokens) 
+
+
+o:
+Original Tokens: ['What', 'is', 'Lorem', 'Ipsum', '?', 'Lorem', 'Ipsum', 'is', 'simply', 'dummy', 'text', 'of', 'the', 'printing', 'and', 'typesetting', 'industry', '.', 'Lorem', 'Ipsum', 'has', 'been', 'the', 'industry', "'s", 'standard', 'dummy', 'text', 'ever', 'since', 'the', '1500s', ',', 'when', 'an', 'unknown', 'printer', 'took', 'a', 'galley', 'of', 'type', 'and', 'scrambled', 'it', 'to', 'make', 'a', 'type', 'specimen', 'book', '.', 'It', 'has', 'survived', 'not', 'only', 'five', 'centuries', ',', 'but', 'also', 'the', 'leap', 'into', 'electronic', 'typesetting', ',', 'remaining', 'essentially', 'unchanged', '.', 'It', 'was', 'popularised', 'in', 'the', '1960s', 'with', 'the', 'release', 'of', 'Letraset', 'sheets', 'containing', 'Lorem', 'Ipsum', 'passages', ',', 'and', 'more', 'recently', 'with', 'desktop', 'publishing', 'software', 'like', 'Aldus', 'PageMaker', 'including', 'versions', 'of', 'Lorem', 'Ipsum', '.']
+
+ 
+# 3. Transform each token into lowercase 
+tokens_lower = [token.lower() for token in tokens] 
+print("\nLowercase Tokens:", tokens_lower) 
+
+o:
+Lowercase Tokens: ['what', 'is', 'lorem', 'ipsum', '?', 'lorem', 'ipsum', 'is', 'simply', 'dummy', 'text', 'of', 'the', 'printing', 'and', 'typesetting', 'industry', '.', 'lorem', 'ipsum', 'has', 'been', 'the', 'industry', "'s", 'standard', 'dummy', 'text', 'ever', 'since', 'the', '1500s', ',', 'when', 'an', 'unknown', 'printer', 'took', 'a', 'galley', 'of', 'type', 'and', 'scrambled', 'it', 'to', 'make', 'a', 'type', 'specimen', 'book', '.', 'it', 'has', 'survived', 'not', 'only', 'five', 'centuries', ',', 'but', 'also', 'the', 'leap', 'into', 'electronic', 'typesetting', ',', 'remaining', 'essentially', 'unchanged', '.', 'it', 'was', 'popularised', 'in', 'the', '1960s', 'with', 'the', 'release', 'of', 'letraset', 'sheets', 'containing', 'lorem', 'ipsum', 'passages', ',', 'and', 'more', 'recently', 'with', 'desktop', 'publishing', 'software', 'like', 'aldus', 'pagemaker', 'including', 'versions', 'of', 'lorem', 'ipsum', '.']
+
+ 
+# 4. Remove stopwords 
+stop_words = set(stopwords.words('english')) 
+tokens_no_stop = [word for word in tokens_lower if word not in stop_words] 
+print("\nTokens without Stopwords:", tokens_no_stop) 
+
+o:
+Tokens without Stopwords: ['lorem', 'ipsum', '?', 'lorem', 'ipsum', 'simply', 'dummy', 'text', 'printing', 'typesetting', 'industry', '.', 'lorem', 'ipsum', 'industry', "'s", 'standard', 'dummy', 'text', 'ever', 'since', '1500s', ',', 'unknown', 'printer', 'took', 'galley', 'type', 'scrambled', 'make', 'type', 'specimen', 'book', '.', 'survived', 'five', 'centuries', ',', 'also', 'leap', 'electronic', 'typesetting', ',', 'remaining', 'essentially', 'unchanged', '.', 'popularised', '1960s', 'release', 'letraset', 'sheets', 'containing', 'lorem', 'ipsum', 'passages', ',', 'recently', 'desktop', 'publishing', 'software', 'like', 'aldus', 'pagemaker', 'including', 'versions', 'lorem', 'ipsum', '.']
+
+ 
+# 5. Remove extra symbols using regex tokenizer 
+regex_tokens = nltk.RegexpTokenizer(r'\w+').tokenize(text.lower()) 
+regex_tokens_no_stop = [word for word in regex_tokens if word not in stop_words] 
+print("\nRegex Clean Tokens:", regex_tokens_no_stop) 
+ 
+o:
+Regex Clean Tokens: ['lorem', 'ipsum', 'lorem', 'ipsum', 'simply', 'dummy', 'text', 'printing', 'typesetting', 'industry', 'lorem', 'ipsum', 'industry', 'standard', 'dummy', 'text', 'ever', 'since', '1500s', 'unknown', 'printer', 'took', 'galley', 'type', 'scrambled', 'make', 'type', 'specimen', 'book', 'survived', 'five', 'centuries', 'also', 'leap', 'electronic', 'typesetting', 'remaining', 'essentially', 'unchanged', 'popularised', '1960s', 'release', 'letraset', 'sheets', 'containing', 'lorem', 'ipsum', 'passages', 'recently', 'desktop', 'publishing', 'software', 'like', 'aldus', 'pagemaker', 'including', 'versions', 'lorem', 'ipsum']
+
+
+# 6. Generate bigram 
+bigrams = list(ngrams(regex_tokens_no_stop, 2)) 
+print("\nBigrams:", bigrams) 
+ 
+
+o:
+Bigrams: [('lorem', 'ipsum'), ('ipsum', 'lorem'), ('lorem', 'ipsum'), ('ipsum', 'simply'), ('simply', 'dummy'), ('dummy', 'text'), ('text', 'printing'), ('printing', 'typesetting'), ('typesetting', 'industry'), ('industry', 'lorem'), ('lorem', 'ipsum'), ('ipsum', 'industry'), ('industry', 'standard'), ('standard', 'dummy'), ('dummy', 'text'), ('text', 'ever'), ('ever', 'since'), ('since', '1500s'), ('1500s', 'unknown'), ('unknown', 'printer'), ('printer', 'took'), ('took', 'galley'), ('galley', 'type'), ('type', 'scrambled'), ('scrambled', 'make'), ('make', 'type'), ('type', 'specimen'), ('specimen', 'book'), ('book', 'survived'), ('survived', 'five'), ('five', 'centuries'), ('centuries', 'also'), ('also', 'leap'), ('leap', 'electronic'), ('electronic', 'typesetting'), ('typesetting', 'remaining'), ('remaining', 'essentially'), ('essentially', 'unchanged'), ('unchanged', 'popularised'), ('popularised', '1960s'), ('1960s', 'release'), ('release', 'letraset'), ('letraset', 'sheets'), ('sheets', 'containing'), ('containing', 'lorem'), ('lorem', 'ipsum'), ('ipsum', 'passages'), ('passages', 'recently'), ('recently', 'desktop'), ('desktop', 'publishing'), ('publishing', 'software'), ('software', 'like'), ('like', 'aldus'), ('aldus', 'pagemaker'), ('pagemaker', 'including'), ('including', 'versions'), ('versions', 'lorem'), ('lorem', 'ipsum')]
+
+# 7. Generate trigram 
+trigrams = list(ngrams(regex_tokens_no_stop, 3)) 
+print("\nTrigrams:", trigrams)
+
+o:
+Trigrams: [('lorem', 'ipsum', 'lorem'), ('ipsum', 'lorem', 'ipsum'), ('lorem', 'ipsum', 'simply'), ('ipsum', 'simply', 'dummy'), ('simply', 'dummy', 'text'), ('dummy', 'text', 'printing'), ('text', 'printing', 'typesetting'), ('printing', 'typesetting', 'industry'), ('typesetting', 'industry', 'lorem'), ('industry', 'lorem', 'ipsum'), ('lorem', 'ipsum', 'industry'), ('ipsum', 'industry', 'standard'), ('industry', 'standard', 'dummy'), ('standard', 'dummy', 'text'), ('dummy', 'text', 'ever'), ('text', 'ever', 'since'), ('ever', 'since', '1500s'), ('since', '1500s', 'unknown'), ('1500s', 'unknown', 'printer'), ('unknown', 'printer', 'took'), ('printer', 'took', 'galley'), ('took', 'galley', 'type'), ('galley', 'type', 'scrambled'), ('type', 'scrambled', 'make'), ('scrambled', 'make', 'type'), ('make', 'type', 'specimen'), ('type', 'specimen', 'book'), ('specimen', 'book', 'survived'), ('book', 'survived', 'five'), ('survived', 'five', 'centuries'), ('five', 'centuries', 'also'), ('centuries', 'also', 'leap'), ('also', 'leap', 'electronic'), ('leap', 'electronic', 'typesetting'), ('electronic', 'typesetting', 'remaining'), ('typesetting', 'remaining', 'essentially'), ('remaining', 'essentially', 'unchanged'), ('essentially', 'unchanged', 'popularised'), ('unchanged', 'popularised', '1960s'), ('popularised', '1960s', 'release'), ('1960s', 'release', 'letraset'), ('release', 'letraset', 'sheets'), ('letraset', 'sheets', 'containing'), ('sheets', 'containing', 'lorem'), ('containing', 'lorem', 'ipsum'), ('lorem', 'ipsum', 'passages'), ('ipsum', 'passages', 'recently'), ('passages', 'recently', 'desktop'), ('recently', 'desktop', 'publishing'), ('desktop', 'publishing', 'software'), ('publishing', 'software', 'like'), ('software', 'like', 'aldus'), ('like', 'aldus', 'pagemaker'), ('aldus', 'pagemaker', 'including'), ('pagemaker', 'including', 'versions'), ('including', 'versions', 'lorem'), ('versions', 'lorem', 'ipsum')]
