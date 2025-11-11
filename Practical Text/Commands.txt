@@ -1,0 +1,211 @@
+Practical 2
+
+cd hadoop
+cd sbin
+start-dfs.cmd
+jps
+start-yarn.cmd
+jps
+hdfs fsck
+hdfs fsck /
+hdfs dfs -ls /
+hdfs dfs -mkdir /myfolder
+hdfs dfs -mkdir /bigdatatest
+hdfs dfs -ls /
+hdfs dfs -touchz /bigdataset/test.dat
+hdfs dfs -ls /
+hdfs dfs -ls /bigdatatest /
+hdfs dfs -ls /bigdatatest /
+hdfs dfs -du -s /bigdatatest/test.dat
+hdfs dfs -appendToFile - /bigdatatest/test.dat
+hdfs dfs -du -s /bigdatatest/test.dat
+hdfs dfs -ls /bigdatatest/test.dat
+hdfs dfs -ls /
+hdfs dfs -chmod 777 /bigdatatest /
+hdfs dfs -ls /
+hdfs dfs -ls /bigdatateset /
+hdfs dfs -rm /bigdatatest/test.dat
+hdfs dfs -ls /bigdatatest /
+
+
+
+Practical 3
+
+cd \
+cd hadoop
+cd sbin
+start-all.cmd
+jps
+hdfs dfs -mkdir /input_map_dir
+hdfs dfs -put D:\data.txt /input_map_dir
+hadoop fs -ls /input_map_dir
+hadoop fs -ch,od 777 /input_map_dir/data.txt
+hadoop fs -ls /input_map_dir
+hadoop jar
+
+
+Practical 4
+
+show dbs
+use ShrutikaBDA
+db.createCollection("product")
+db.product.insert({"item":"box","qty":200,tested:"yes"})
+db.product.find()
+db.product.find().pretty()
+db.stats()
+db.help()
+
+
+
+Practical 5
+
+show dbs
+
+use Prac5
+
+db.createCollection("Car")
+
+db.Car.insertOne({ name: "Bugatti", model: "2005" })
+
+db.Car.insertMany([{ name: "Bugatti", model: "2005"}, {name:"Maruti", model:"2013"}])
+
+db.Car.find()
+
+db.Car.find({"model":"2005"})
+
+db.Car.updateOne({"_id":ObjectId("1234")},{$set:{model:'2050'}})
+
+db.Car.find({"_id":ObjectId("1234")})
+
+db.Car.updateOne({model:"2050"},{$set:{name:'Shrutika'}})
+
+db.Car.find({"_id":ObjectId("1234")})
+
+db.Car.deleteOne({ name: "Shrutika"})
+
+db.Car.deleteMany({ model: "2005" })
+
+db.Car.find()
+
+db.Car.deleteMany({})
+
+db.Car.find()
+
+
+
+
+Practical 6
+
+show dbs
+
+use Prac6
+
+db.students.insertMany([ {"name":"Shrutika","age":22,"course":"Computer Science"} ])
+
+db.students.find({ age: { $eq: 22 } })
+
+db.students.find({ course: { $ne: "Computer Science" } })
+
+db.students.find({ age: { $gt: 22 } })
+
+db.students.find({ age: { $gte: 23 } })
+
+db.students.find({ age: { $lt: 21 } })
+
+db.students.find({ age: { $lte:21 } })
+
+db.students.find({ course: { $in: ["Computer Science", "Electronics"] } })
+
+db.students.find({ course: { $nin: ["Civil Engineering", "Mechanical Engineering"] } })
+
+db.students.find({ $and: [ { age: 22}, { course: "Computer Science" } ] })
+
+db.students.find({ $or: [ { course: "Electronics"}, {course: "Civil Engineering"} ] })
+
+db.students.find({ age: { $not: { $gt: 22 } } })
+
+db.students.find({ $nor: [ { course: "Electronics" }, { course: "Civil Engineering" } ] })
+
+db.students.find().pretty()
+
+
+
+Practical 7
+
+use Shrutika
+
+db.students.insertMany ([ {name: "Rahul", age:22, marks:85, course: "Computer Science"} ])
+
+db.students.find().sort({ marks: -1 }).limit(3)
+
+db.students.find().skip(2)
+
+db.students.find().sort({ marks: 1 })
+
+db.students.deleteMany({ marks: { $lt: 40 } })
+
+db.students.countDocuments({ course: "Computer Science" })
+
+db.students.aggregate([{ $group: { _id: "$course", avgMarks: { $avg: "$marks"} } } ])
+
+db.students.aggregate([ { $group: { _id:"$course", Sum: { $sum: "$marks"}, Min: { $min: "$marks"}, Max: { $max: "$marks"} } } ])
+
+
+
+
+Practical 8
+
+use ShrutikaBDA
+
+db.Students.insertMany([{roll_no:1, name: "Shrutika", age:21, marks:85, city:"Delhi"} ])
+
+#Single Field
+db.Students.createIndex({"city": 1})
+
+db.Students.find({city: "Delhi"}).explain("executionStats");
+
+
+#Compound Field
+db.Students.createIndex({city: 1, age: -1});
+
+db.Students.find({city:"Delhi"}).sort({age: -1}).explain("executionStats");
+
+#Unique Index
+db.Students.createIndex({roll_no: 1},{unique:true})
+
+db.Students.insertOne({roll_no: 1, name: "Anjali", age: 22, marks: 90, city: "Mumbai"});
+
+#Text Index
+db.Students.createIndex({name:"text"})
+
+db.Students.find({$text: {$search: "Shrutika"}}).explain("executionStats");
+
+
+
+db.Students.dropIndex({"city": 1});
+
+
+
+
+Practical 9
+
+ls
+hdfs dfs -ls
+cd hadoop
+ls
+vi hello.txt
+ls
+cat hello.txt
+	Hello i am sghrutika
+hdfs dfs -mkdir /shrutika
+hdfs dfs -put hello.txt /shrutika/data.txt
+hdfs dfs -cat /shrutika/data.txt
+ls
+hdfs dfs -cp /shrutika/data.txt /input/data.txt
+hdfs dfs -cat /input/data.txt
+ls
+cat data.txt
+hdfs dfs -get /input/data.txt
+ls
+vi data.txt
+cat data.txt

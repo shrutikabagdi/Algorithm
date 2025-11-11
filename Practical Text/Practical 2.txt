@@ -1,0 +1,112 @@
+Aim: Implementing the basic Hadoop HDFS Commands like File/Directory 
+creation, deletion, update and many more operations.
+
+THEORY: 
+HDFS is the primary or major component of the Hadoop ecosystem which is responsible for storing large 
+data sets of structured or unstructured data across various nodes and thereby maintaining the metadata in the 
+form of log files. With the help of the HDFS command, we can perform Hadoop HDFS file operations like 
+changing the file permissions, viewing the file contents, creating files or directories, copying file/directory 
+from the local file system to HDFS or vice-versa, etc. 
+
+Before starting with the HDFS command, we have to start the Hadoop services. To start the Hadoop services 
+do the following: 
+
+Hadoop mkdir Command  
+hadoop fs -mkdir /path/directory_name 
+ 
+This command’s unique feature is the creation of a directory in the HDFS filesystem cluster if the directory 
+does not exist. Besides, if the specified directory is present, then the output message will show an error 
+signifying the directory’s existence.
+ 
+Hadoop Touchz(Creating an Empty File:) 
+hadoop fs -touchz /directory/filename 
+ 
+This command allows the user to create a new file in the HDFS cluster. The “directory” in the command 
+refers to the directory name where the user wishes to create the new file, and the “filename” signifies the 
+name of the new file which will be created upon the completion of the command. 
+
+Hadoop AppendToFile Command  
+hadoop fs -appendToFile <localsrc> <dest> 
+ 
+It allows the user to append the content of one or many files into a single file on the specified destination 
+file in the HDFS filesystem cluster. On execution of this command, the given source files are appended into 
+the destination source as per the given filename in the command. 
+
+Hadoop ls Command  
+hadoop dfs -ls /path 
+ 
+The Hadoop dfs shell command ls displays a list of the contents of a directory specified in the path provided 
+by the user. It shows the name, permissions, owner, size, and modification date for each file or directories 
+in the specified directory. 
+
+Hadoop chmod Command  
+hadoop fs -chmod [-R] <mode> <path> 
+ 
+This command is used when there is a need to change the permissions to accessing a particular file. On 
+giving the chmod command, the permission of the specified file is changed. However, it is important to 
+remember that the permission will be modified when the file owner executes this command. 
+
+copyFromLocal 
+ 
+The hadoop fs -copyFromLocal command is used to copy files from your local file system to the Hadoop 
+Distributed File System (HDFS). This command is particularly useful when you want to transfer files from 
+your local machine to the HDFS for further processing or storage in a Hadoop cluster. 
+
+hadoop dfs -copyFromLocal /home/user/data.txt /user/hadoop/input 
+ 
+In this example: 
+/home/user/data.txt is the source file on your local machine. 
+ 
+/user/hadoop/input is the destination directory in HDFS. 
+ 
+put: 
+ 
+This command is used to copy files from the local file system to the HDFS filesystem. This command is 
+similar to –copyFromLocal command. This command will not work if the file already exists unless the –f 
+flag is given to the command. This overwrites the destination if the file already exists before the copy. 
+Deleting a File 
+ 
+hadoop fs -rm /hdfs/path/to/file 
+ 
+Deleting a Directory (Empty): 
+ 
+hadoop fs -rmdir /hdfs/path/to/directory 
+ 
+du: 
+ 
+This command is used to show the amount of space in bytes that have been used by the files that match the 
+specified file pattern. Even without the –s option, this only shows the size summaries one level deep in the 
+directory. 
+hadoop dfs -du [-s] [-h] 
+ -s:- used to show the size of each individual file that matches the pattern, shows the total (summary) size 
+ -h:- used to format the sizes of the files in a human-readable manner rather than the number of bytes. 
+
+
+commands:
+
+cd hadoop
+cd sbin
+start-dfs.cmd
+jps
+start-yarn.cmd
+jps
+hdfs fsck
+hdfs fsck /
+hdfs dfs -ls /
+hdfs dfs -mkdir /myfolder
+hdfs dfs -mkdir /bigdatatest
+hdfs dfs -ls /
+hdfs dfs -touchz /bigdataset/test.dat
+hdfs dfs -ls /
+hdfs dfs -ls /bigdatatest /
+hdfs dfs -ls /bigdatatest /
+hdfs dfs -du -s /bigdatatest/test.dat
+hdfs dfs -appendToFile - /bigdatatest/test.dat
+hdfs dfs -du -s /bigdatatest/test.dat
+hdfs dfs -ls /bigdatatest/test.dat
+hdfs dfs -ls /
+hdfs dfs -chmod 777 /bigdatatest /
+hdfs dfs -ls /
+hdfs dfs -ls /bigdatateset /
+hdfs dfs -rm /bigdatatest/test.dat
+hdfs dfs -ls /bigdatatest /

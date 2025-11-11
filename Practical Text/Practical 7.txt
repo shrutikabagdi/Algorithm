@@ -1,0 +1,70 @@
+Aim: To implement No-SQL database function: Count, Remove, Sort, Limit, 
+Skip & aggregation using MongoDB.
+
+THEORY:
+ 
+1) The MongoDB Limit() Method 
+To limit the records in MongoDB, you need to use limit() method. limit() method accepts one number 
+type argument, which is number of documents that you want to displayed. 
+Syntax: 
+Basic syntax of limit() method is as follows 
+>db.COLLECTION_NAME.find().limit(NUMBER) 
+
+
+2) The MongoDB Skip() Method 
+Apart from limit() method there is one more method skip() which also accepts number type argument and 
+used to skip number of documents. 
+Syntax: 
+Basic syntax of skip() method is as follows 
+>db.COLLECTION_NAME.find().limit(NUMBER).skip(NUMBER)
+
+3) The sort() Method 
+To sort documents in MongoDB, you need to use sort() method. sort() method accepts a document 
+containing list of 
+fields along with their sorting order. To specify sorting order 1 and -1 are used. 1 is used for ascending 
+order while -1 is used for descending order. 
+Syntax: 
+Basic syntax of sort() method is as follows 
+>db.COLLECTION_NAME.find().sort({KEY:1}) 
+
+4) Remove() Function in MongoDB 
+In MongoDB, the db.collection.remove() method is used to remove documents from a collection. Either 
+all of the documents can be removed from a collection or only those which matches a specific condition. 
+If you just issue the remove command, all of the documents will be removed from the collection.
+
+5)  Count() Function in MongoDB 
+db.collection.count(query) 
+Returns the count of documents that would match a find() query. The db.collection.count() method does 
+not perform the find() operation but instead counts and returns the number of results that match a query. 
+db.collection.find( { a: { $gt: 5 } } ).count() 
+db.collection.find( { a: 5, b: { $gt: 10 } } ).count() 
+
+6) Aggregation Functions in MongoDB: 
+         a. $sum: Returns the sum of numeric values. 
+         b. $avg : Returns the average of numeric values 
+         c. $min : Returns the minimum value. 
+         d. $max : Returns the maximum value. 
+         e. $count : Counts the number of documents. 
+
+
+
+
+Command:
+
+use Shrutika
+
+db.students.insertMany ([ {name: "Rahul", age:22, marks:85, course: "Computer Science"} ])
+
+db.students.find().sort({ marks: -1 }).limit(3)
+
+db.students.find().skip(2)
+
+db.students.find().sort({ marks: 1 })
+
+db.students.deleteMany({ marks: { $lt: 40 } })
+
+db.students.countDocuments({ course: "Computer Science" })
+
+db.students.aggregate([{ $group: { _id: "$course", avgMarks: { $avg: "$marks"} } } ])
+
+db.students.aggregate([ { $group: { _id:"$course", Sum: { $sum: "$marks"}, Min: { $min: "$marks"}, Max: { $max: "$marks"} } } ])

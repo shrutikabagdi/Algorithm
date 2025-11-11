@@ -1,0 +1,58 @@
+Aim: To Develop a MapReduce program to calculate the frequency of a word in 
+a given file. 
+
+THEORY: 
+MapReduce is a parallel programming model for writing distributed applications devised at Google for 
+efficient processing of large amounts of data (multi-terabyte data-sets), on large clusters (thousands of nodes) 
+of commodity hardware in a reliable, fault-tolerant manner. The MapReduce program runs on Hadoop which 
+is an Apache open-source framework 
+WordCount is a simple program which counts the number of occurrences of each word in a given-text input 
+data set. WordCount fits very well with the MapReduce programming model making it a great example to 
+understand the Hadoop Map/Reduce programming style. Our implementation consists of two main parts: 
+1. Mapper 
+2. Reducer 
+MapReduce consists of 2 steps: 
+ 
+Map Function – It takes a set of data and converts it into another set of data, where individual elements are 
+broken down into tuples (Key-Value pair). 
+Input (Set of Data) : Bus, Car, bus, car, train, car, bus, car, train, bus, TRAIN,BUS, buS, BUS, TRAIN 
+Output (Convert into another set of data) (Key,Value) :
+(Bus,1), (Car,1), (bus,1), (car,1), (train,1), (car,1), (bus,1), (car,1), (train,1), (bus,1), (TRAIN,1),(BUS,1), (buS,1), 
+(caR,1), (CAR,1), (car,1), (BUS,1), (TRAIN,1) 
+Reduce Function – Takes the output from Map as an input and combines those data tuples into a smaller set 
+of tuples. 
+Input (Set of tuples): (Bus,1), (Car,1), (bus,1), (car,1), (car,1), (bus,1), (car,1), (train,1), 
+(TRAIN,1),(BUS,1), (buS,1), (caR,1 ) (car,1), (BUS,1), (TRAIN,1) 
+Output (Converts into smaller set of tuples ) (BUS,7), (CAR,7), (TRAIN,4)
+
+
+Workflow of MapReduce consists of 5 steps: 
+ 
+1. Splitting – The splitting parameter can be anything, e.g. splitting by space, comma, semicolon, or even 
+by a new line (‘\n’). 
+ 
+2. Mapping – as explained above. 
+ 
+3. Intermediate splitting – the entire process in parallel on different clusters. In order to group them in 
+“Reduce Phase” the similar KEY data should be on the same cluster. 
+ 
+4. Reduce – it is nothing but mostly group by phase. 
+
+5. Combining – The last phase where all the data (individual result set from each cluster) is combined 
+together to form a result. 
+
+
+
+
+Command:
+cd \
+cd hadoop
+cd sbin
+start-all.cmd
+jps
+hdfs dfs -mkdir /input_map_dir
+hdfs dfs -put D:\data.txt /input_map_dir
+hadoop fs -ls /input_map_dir
+hadoop fs -ch,od 777 /input_map_dir/data.txt
+hadoop fs -ls /input_map_dir
+hadoop jar
