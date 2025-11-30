@@ -1,0 +1,279 @@
+Aim: Apply the knowledge to study and implement VGG16 in deep learning.
+
+THEORY:
+THEORY: 
+VGG- Network is a convolutional neural network model proposed by K. Simonyan and A. Zisserman in 
+the paper “Very Deep Convolutional Networks for Large-Scale Image Recognition” [1]. This 
+architecture achieved top-5 test accuracy of 92.7% in ImageNet, which has over 14 million images 
+belonging to 1000 classes. 
+It is one of the famous architectures in the deep learning field. Replacing large kernel-sized filters with 
+11 and 5 in the first and second layer respectively showed the improvement over AlexNet architecture, 
+with multiple 3×3 kernel-sized filters one after another. It was trained for weeks and was using NVIDIA 
+Titan Black GPU’s. 
+ 
+VGG16 Architecture 
+• The input to the convolution neural network is a fixed-size 224 × 224 RGB image. The only 
+preprocessing it does is subtracting the mean RGB values, which are computed on the training 
+dataset, from each pixel. 
+• Then the image is running through a stack of convolutional (Conv.) layers, where there are 
+filters with a very small receptive field that is 3 × 3, which is the smallest size to capture the 
+notion of left/right, up/down, and center part. 
+• In one of the configurations, it also utilizes 1 × 1 convolution filters, which can be observed as a 
+linear transformation of the input channels followed by non-linearity. The convolutional strides 
+are fixed to 1 pixel; the spatial padding of convolutional layer input is such that the spatial 
+resolution is maintained after convolution, that is the padding is 1 pixel for 3 × 3 Conv. layers. 
+• Then the Spatial pooling is carried out by five max-pooling layers, 16 which follow some of the 
+Conv. layers but not all the Conv. layers are followed by max-pooling. This Max-pooling is 
+performed over a 2 × 2-pixel window, with stride 2. 
+• The architecture contains a stack of convolutional layers which have a different depth in 
+different architectures which are followed by three Fully-Connected (FC) layers: the first two FC 
+have 4096 channels each and the third FC performs 1000-way classification and thus contains 
+1000 channels that is one for each class. 
+• The final layer is the soft-max layer. The configuration of the fully connected layers is similar in 
+all networks. 
+• All of the hidden layers are equipped with rectification (ReLU) non-linearity. Also, here one of 
+the networks contains Local Response Normalization (LRN), such normalization does not 
+improve the performance on the trained dataset, but usage of that leads to increased memory 
+consumption and computation time. 
+ 
+
+Architecture Summary: 
+• Input to the model is a fixed size 224×224224×224 RGB image 
+• Pre-processing is subtracting the training set RGB value mean from each pixel 
+• Convolutional layers 17 
+– Stride fixed to 1 pixel 
+– padding is 1 pixel for 3×33×3 
+• Spatial pooling layers 
+– This layer doesn’t count to the depth of the network by convention 
+– Spatial pooling is done using max-pooling layers – window size is 2×22×2 
+– Stride fixed to 2 
+– Convnets used 5 max-pooling layers 
+• Fully-connected layers: 
+• 1st: 4096 (ReLU). 
+▪ 2nd: 4096 (ReLU). 
+▪ 3rd: 1000 (Softmax). 
+
+Advantages: 
+1. High Accuracy: Performs exceptionally well for image classification tasks. 
+2. Simple Architecture: Uses only 3×3 convolutions and 2×2 pooling layers, making the design 
+consistent and easy to implement. 
+3. Transfer Learning: Pre-trained VGG16 models can be easily used for various applications with 
+limited data. 
+4. Feature Extraction Power: Deep layers effectively capture spatial and visual hierarchies of images. 
+ 
+Disadvantages: 
+1. High Computational Cost: Requires significant memory and computation power due to a large 
+number of parameters (~138 million). 
+2. Training Time: Takes a long time to train from scratch. 
+3. Redundant Parameters: Large fully connected layers contribute heavily to model size and 
+redundancy. 
+4. Not Efficient for Real-Time Applications: Due to its depth and complexity, it is less suitable for 
+real-time or mobile-based applications. 
+ 
+Applications: 
+1. Image Classification: Classifying objects in large-scale datasets like ImageNet. 
+2. Feature Extraction: Used to extract deep visual features for other machine learning tasks. 
+3. Object Detection and Recognition: Serves as a backbone network in models like Faster R-CNN. 
+4. Medical Image Analysis: Used for disease detection from MRI, CT scans, or X-rays. 
+5. Transfer Learning: Fine-tuned for custom datasets (e.g., plant disease detection, animal 
+classification, facial recognition).
+
+
+
+
+CODE:
+ 
+Vgg Implementation
+ 
+%pip install tensorflow 
+ 
+import numpy as np 
+import tensorflow as tf 
+from tensorflow import keras 
+from tensorflow.keras import Sequential 
+from tensorflow.keras.utils import plot_model 
+from keras.layers import Conv2D, MaxPool2D, Dropout, Dense, Input, concatenate,  
+GlobalAveragePooling2D, AveragePooling2D, Flatten 
+from keras.models import Model 
+ 
+# Preparing the dataset 
+(train_images, train_labels), (test_images, test_labels) = keras.datasets.cifar10.load_data() 
+CLASS_NAMES= ['airplane', 'automobile', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse','ship','truck'] 
+ 
+# Preparing the dataset 
+validation_images, validation_labels = train_images[:5000], train_labels [:5000] 
+train_images, train_labels , train_images [5000:], train_labels [5000:] 
+ 
+# Building tensorflow datasets. 
+train_ds = tf.data.Dataset.from_tensor_slices((train_images, train_labels)) 
+test_ds = tf.data.Dataset.from_tensor_slices((test_images, test_labels)) 
+validation_ds = tf.data.Dataset.from_tensor_slices((validation_images, validation_labels)) 
+def process_images (image, label): 
+    # Normalize images to have a mean of 0 and standard deviation of 1 
+    image = tf.image.per_image_standardization (image) 
+    # Resize images from 32x32 to 274x274 
+    image = tf.image.resize(image, (224,224)) 
+    label = tf.one_hot(label, depth=10)  # One-hot encode the labels 
+    label = tf.squeeze(label, axis=0) # Remove the extra dimension 
+    return image, label 
+ 
+train_ds_size = tf.data.experimental.cardinality (train_ds).numpy() 
+test_ds_size = tf.data.experimental.cardinality(test_ds).numpy() 
+validation_ds_size = tf.data.experimental.cardinality (validation_ds).numpy() 
+train_ds = (train_ds 
+            .map(process_images) 
+            .shuffle(buffer_size=train_ds_size) 
+            .batch(batch_size=32, drop_remainder=True)) 
+test_ds = (test_ds 
+           .map(process_images) 
+           .shuffle(buffer_size=train_ds_size) 
+           .batch(batch_size=32, drop_remainder=True)) 
+validation_ds = (validation_ds 
+                 .map(process_images) 
+                 .shuffle(buffer_size=train_ds_size) 
+                 .batch(batch_size=32, drop_remainder=True)) 
+ 
+model = Sequential() 
+model.add(Conv2D(input_shape=(224,224,3),filters=64, kernel_size=(3,3), padding="same", 
+Deep Learning (PECCS704P) 
+ 
+                          Department of Computer Science & Engineering, S.B.J.I.T.M.R, Nagpur 
+ 
+activation="relu")) 
+model.add(Conv2D (filters=64, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(MaxPool2D (pool_size=(2,2), strides=(2,2))) 
+model.add(Conv2D(filters=128, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(Conv2D (filters=128, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(MaxPool2D (pool_size=(2,2), strides=(2,2))) 
+model.add(Conv2D(filters=256, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(Conv2D (filters=256, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(Conv2D (filters=256, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(MaxPool2D (pool_size=(2,2), strides=(2,2))) 
+model.add(Conv2D (filters=512, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(Conv2D(filters=512, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(Conv2D (filters=512, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(MaxPool2D(pool_size=(2,2), strides=(2,2))) 
+model.add(Conv2D (filters=512, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(Conv2D (filters=512, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(Conv2D (filters=512, kernel_size=(3,3), padding="same", activation="relu")) 
+model.add(MaxPool2D(pool_size=(2,2), strides=(2,2), name='vgg16')) 
+model.add(Flatten (name='flatten')) 
+model.add(Dense (256, activation= 'relu', name='fc1')) 
+model.add(Dense (128, activation='relu', name='fc2')) 
+model.add(Dense(10, activation='softmax', name='output')) 
+ 
+# Compiling the Model 
+model.compile(optimizer='adam', loss=keras.losses.categorical_crossentropy) 
+# Checking Model Summary 
+model.summary() 
+ 
+pip install pydot 
+plot_model(model, to_file="my_model.png", show_shapes=True, show_layer_names=True) 
+ 
+#model testing 
+history = model.fit(train_ds, epochs=10, validation_data=validation_ds,validation_freq=1) 
+ 
+#Model Evaluartion 
+model.evaluate(test_x, test_y) 
+ 
+
+
+Vgg Transfer Learning:
+ 
+import tensorflow as tf 
+print(tf.__version__) 
+ 
+from google.colab import drive  
+drive.mount("/content/drive") 
+ 
+# import the libraries as shown below 
+from tensorflow.keras.layers import Input, Lambda, Dense, Flatten 
+from tensorflow.keras.models import Model 
+from tensorflow.keras.applications.vgg16 import VGG16 
+from tensorflow.keras.applications.vgg19 import VGG19 
+from tensorflow.keras.preprocessing import image 
+from tensorflow.keras.preprocessing.image import ImageDataGenerator, load_img 
+from tensorflow.keras.models import Sequential 
+import numpy as np 
+from glob import glob 
+ 
+# re-size all the images to this 
+IMAGE_SIZE = [224, 224] 
+#train_path = 'Datasets/train' 
+#valid_path = 'Datasets/test' 
+train_path = '/content/drive/MyDrive/Deep Learning/Cotton Disease/train' 
+valid_path = '/content/drive/MyDrive/Deep Learning/Cotton Disease/test' 
+ 
+ 
+# Import the VGG16 library as shown below and add preprocessing layer to the front # Here we will be 
+using imagenet weights 
+vgg16 = VGG16 (input_shape=IMAGE_SIZE + [3], weights='imagenet', include_top=False) 
+# don't train existing weights 
+for layer in vgg16.layers: 
+    layer.trainable = False 
+ 
+# useful for getting number of output classes 
+folders = glob('/content/drive/MyDrive/Deep Learning/Cotton Disease/train/*') 
+ 
+# our layers you can add more if you want 
+x = Flatten()(vgg16.output) 
+len(folders) 
+prediction = Dense(len(folders), activation='softmax')(x) 
+# create a model object 
+model = Model(inputs=vgg16.input, outputs=prediction) 
+# view the structure of the model 
+model.summary() 
+ 
+# tell the model what cost and optimization method to use 
+model.compile( 
+Deep Learning (PECCS704P) 
+ 
+                          Department of Computer Science & Engineering, S.B.J.I.T.M.R, Nagpur 
+ 
+  optimizer='adam', 
+  loss='categorical_crossentropy', 
+  metrics=['accuracy'] 
+) 
+ 
+# Use the Image Data Generator to import the images from the dataset from 
+tensorflow.keras.preprocessing.image import ImageDataGenerator 
+train_datagen = ImageDataGenerator (rescale = 1./255, 
+shear_range = 0.2, 
+zoom_range = 0.2, horizontal_flip = True) 
+test_datagen = ImageDataGenerator (rescale = 1./255) 
+ 
+# Make sure you provide the same target size as initialied for the image size 
+training_set = train_datagen.flow_from_directory('/content/drive/MyDrive/Deep Learning/Cotton 
+Disease/train', target_size = (224, 224), batch_size = 32, class_mode = 'categorical') 
+ 
+test_set = test_datagen.flow_from_directory('/content/drive/MyDrive/Deep Learning/Cotton 
+Disease/test', target_size = (224, 224), batch_size = 32, class_mode = 'categorical') 
+ 
+# fit the model 
+# Run the cell. It will take some time to execute 
+r = model.fit(training_set,validation_data=test_set,epochs=1,steps_per_epoch=len (training_set), 
+validation_steps=len(test_set)) 
+ 
+import matplotlib.pyplot as plt 
+# plot the loss 
+plt.plot(r.history['loss'], label='train loss') 
+plt.plot(r.history['val_loss'], label='val loss') 
+plt.legend() 
+plt.show() 
+plt.savefig('LossVal_loss') 
+# plot the accuracy 
+plt.plot(r.history['accuracy'], label='train acc') 
+plt.plot(r.history['val_accuracy'], label='val acc') 
+plt.legend() 
+plt.show() 
+plt.savefig('AccVal_acc') 
+ 
+from tensorflow.keras.models import load_model 
+model.save('model_vgg16.h5') 
+ 
+y_pred = model.predict(test_set) 
+y_pred 
+ 
+import numpy as np 
+y_pred = np.argmax (y_pred, axis=1) 
+y_pred

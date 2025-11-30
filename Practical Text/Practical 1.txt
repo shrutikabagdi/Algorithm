@@ -1,0 +1,155 @@
+Aim: Understanding Google Colab and various libraries of Python. 
+
+
+THEORY: GOOGLE COLABORATORY
+
+Definition:
+Google Colab (Colaboratory) is a free cloud-based platform by Google that lets users write and run Python code online without setup. It supports machine learning, data science, and education using cloud resources like GPUs and TPUs.
+
+Key Features:
+
+Cloud Computing:
+Runs on Google’s cloud — no local installation needed.
+Accessible from anywhere with internet.
+
+Jupyter Notebook Based:
+Built on Jupyter — supports live code, text, equations, and visualizations.
+
+Google Drive Integration:
+Automatically saves work to Drive.
+Easy sharing and collaboration.
+
+Free GPU/TPU Access:
+Provides free hardware accelerators for faster ML training.
+
+Version Control:
+Tracks and restores previous notebook versions.
+
+Preinstalled Libraries:
+Comes with NumPy, Pandas, Matplotlib, TensorFlow, PyTorch, etc.
+You can install more libraries if needed.
+
+Educational Use:
+Popular for teaching coding, ML, and data science.
+
+Community Support:
+Large user community with tutorials and guides.
+
+Basic Operations in Colab:
+New Notebook: Create a new Python notebook.
+Open/Upload Notebook: Load files from Drive or your computer.
+Save/Save a Copy: Save your work to Drive.
+Revision History: View or restore earlier versions.
+Download: Export notebooks as .ipynb, .py, .html, or .pdf.
+Convert to Form: Turn notebook into an interactive form.
+Print: Print or save as PDF.
+
+Menu Options:
+Edit: Cut, copy, paste, undo, redo, find & replace.
+View: Show/hide toolbar, header, or cell toolbar.
+Insert: Add code, text, or image cells.
+Runtime: Change CPU/GPU, run all cells, or run specific sections.
+
+Uses:
+Data Science: Analyze and visualize data with Python libraries.
+Machine Learning: Train and test ML models using cloud GPUs/TPUs.
+
+
+
+CODE:
+
+Pytorch: 
+ 
+1) import torch 
+  import torch.nn as nn 
+import torch.optim as optim 
+from torchvision import datasets, transforms 
+ 
+2) class Net(nn.Module): 
+    def __init__(self): 
+        super(Net, self).__init__() 
+        self.fc1 = nn.Linear(784, 128) 
+        self.relu = nn.ReLU() 
+              self.fc2 = nn.Linear(128, 10) 
+    def forward(self, x): 
+x = self.relu(self.fc1(x)) 
+            return self.fc2(x) 
+ 
+3) transform = transforms.Compose([transforms.ToTensor(), transforms.Lambda(lambda x: x.view(-1))]) 
+train_data = datasets.MNIST(root='./data', train=True, download=True, transform=transform) 
+train_loader = torch.utils.data.DataLoader(train_data, batch_size=64, shuffle=True) 
+ 
+4) model = Net() 
+criterion = nn.CrossEntropyLoss() 
+optimizer = optim.Adam(model.parameters(), lr=0.001) 
+ 
+5) # Training loop 
+for epoch in range(5): 
+    for images, labels in train_loader: 
+        outputs = model(images) 
+        loss = criterion(outputs, labels) 
+        optimizer.zero_grad() 
+        loss.backward() 
+        optimizer.step() 
+    print(f"Epoch {epoch+1}, Loss: {loss.item():.4f}") 
+
+
+
+
+TensorFlow: 
+ 
+1) import tensorflow as tf 
+from tensorflow.keras import layers, models 
+ 
+2) # Define a simple feedforward neural network 
+model = models.Sequential([ 
+    layers.Dense(128, activation='relu', input_shape=(784,)), 
+        layers.Dropout(0.2),
+         layers.Dense(10, activation='softmax') 
+ 
+3) # Compile the model 
+model.compile(optimizer='adam', 
+              loss='sparse_categorical_crossentropy', 
+              metrics=['accuracy']) 
+ 
+4) # Load and preprocess data (e.g., MNIST) 
+(x_train, y_train), (x_test, y_test) = tf.keras.datasets.mnist.load_data() 
+x_train = x_train.reshape(-1, 784).astype("float32") / 255 
+x_test = x_test.reshape(-1, 784).astype("float32") / 255 
+ 
+5) # Train the model 
+model.fit(x_train, y_train, epochs=5, batch_size=32) 
+ 
+6) # Evaluate 
+model.evaluate(x_test, y_test) 
+ 
+
+
+Keres: 
+ 
+1) from tensorflow import keras 
+from tensorflow.keras import layers 
+ 
+2) # Define a Sequential model 
+model = keras.Sequential([ 
+    layers.Dense(128, activation='relu', input_shape=(784,)), 
+    layers.Dropout(0.3), 
+    layers.Dense(64, activation='relu'), 
+          layers.Dense(10, activation='softmax') 
+]) 
+ 
+3) # Compile the model 
+model.compile(optimizer='adam', 
+              loss='sparse_categorical_crossentropy', 
+                    metrics=['accuracy']) 
+ 
+4) # Load and preprocess MNIST data 
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data() 
+x_train = x_train.reshape(-1, 784).astype("float32") / 255 
+x_test = x_test.reshape(-1, 784).astype("float32") / 255 
+ 
+5) # Train the model 
+model.fit(x_train, y_train, epochs=5, batch_size=32) 
+ 
+6) # Evaluate 
+model.evaluate(x_test, y_test)
