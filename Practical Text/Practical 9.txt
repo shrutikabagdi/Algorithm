@@ -1,0 +1,266 @@
+AIM: Load the demotext2.txt text file into a variable , Do vectorization using TFID Vectorizer for 
+Comprehension Feature Extraction.
+
+THEORY: 
+In Natural language Processing (NLP), we have to convert text into numerical representation to 
+apply machine learning techniques to process the text. This is called Vectorization. TF-IDF is a 
+popular vectorization technique used in NLP. One way to convert words (in a document)in to 
+numbers is by calculating how many times a term (t) appears in document(D). This is called Term 
+Frequency(TF). 
+
+              TF(t) = (count(t) in D / Total words in D) 
+
+TF gives a measure of important words in a single document. 
+
+The problem with Term Frequency is that, it considers all words equally, stop words like ‘a’, ‘the’ 
+etc will occur more in any document but are not significant. To solve this issue, we discuss IDF. 
+
+Inverse Document Frequency(IDF): 
+Before discussing IDF, let’s see what is Document Frequency(DF). Also remember now we are 
+going to talk about a set of documents as in a document similarity, or search ranking application. 
+
+Document Frequency (DF) : says how many documents in a set of documents contain a 
+particular term. 
+
+This will decide the informativeness of a word. If a term ‘t’ is present in all documents of the set, 
+chances are less that the word is informative. Eg: stop words. So, we can say informativeness is 
+inversely proportional to Document Frequency(DF). 
+
+And that is why Inverse Document Frequency(IDF) is significant. It is defined as 
+
+IDF(w) = log(Total no. of Docs / No. of docs containing the term ‘t’) 
+
+Let’s see with an example, 
+
+If there are 1000 documents and a word appears in all 1000, 
+log(1000/1000) = 0 
+(I take base 10 to keep it simple). 
+This means it is not an important word (can be a stop word). 
+But if only 10 documents have this word, 
+log(1000/10) = 2 
+
+This means word may be an important word and that document can be relevant in case of ranking 
+/information retrieval. 
+
+TF-IDF 
+Now we use both TF and IDF to create a meaningful numerical representation of text. 
+                 TF-IDF = TF(t) * IDF(t) 
+This product will be high if both TF and IDF are high for a term. A term,’t’ that repeats many 
+times in a document, say D1 and it occurs only in a few documents in the corpus will have a high 
+TF-IDF value for D1. So if this is a search for ‘t’ (like Google search) D1 will appear first. 
+TF -IDF is frequencies weighted by uniqueness.  
+
+
+
+Code:
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+try:
+    with open('/content/demotext2.txt', 'r') as file:
+        text_content = file.read()
+    print("File loaded successfully.")
+
+    if text_content:
+        tfidf_vectorizer = TfidfVectorizer()
+        tfidf_features = tfidf_vectorizer.fit_transform([text_content])
+        print("TF-IDF vectorization complete.")
+
+        print("\nTF-IDF Feature Vectors:")
+        # print(tfidf_features)
+
+        # Get the feature names (words)
+        feature_names = tfidf_vectorizer.get_feature_names_out()
+
+        # Convert the sparse matrix to a dense array for easier iteration
+        dense_features = tfidf_features.todense()
+
+        # Print the words and their TF-IDF scores
+        print("\nWords and their TF-IDF Scores:")
+        for doc_index, doc_features in enumerate(dense_features):
+            print(f"Document {doc_index + 1}:")
+            for word_index, score in enumerate(doc_features.tolist()[0]):
+                if score > 0: # Only print words with a score greater than 0
+                    print(f"  {feature_names[word_index]}: {score}")
+
+    else:
+        print("Text content is empty. Cannot perform TF-IDF vectorization.")
+
+except FileNotFoundError:
+    text_content = None
+    print("Error: demotext2.txt not found. Please upload the file.")
+except Exception as e:
+    print(f"An error occurred: {e}")
+
+
+
+Output:
+
+File loaded successfully.
+TF-IDF vectorization complete.
+
+TF-IDF Feature Vectors:
+
+Words and their TF-IDF Scores:
+Document 1:
+  16j7: 0.028629916715693413
+  9th: 0.028629916715693413
+  admirable: 0.028629916715693413
+  admirer: 0.028629916715693413
+  after: 0.057259833431386825
+  alike: 0.028629916715693413
+  also: 0.028629916715693413
+  an: 0.028629916715693413
+  and: 0.486708584166788
+  any: 0.057259833431386825
+  arabic: 0.028629916715693413
+  arts: 0.028629916715693413
+  as: 0.028629916715693413
+  at: 0.028629916715693413
+  attended: 0.028629916715693413
+  beer: 0.028629916715693413
+  bra: 0.028629916715693413
+  brought: 0.028629916715693413
+  but: 0.028629916715693413
+  by: 0.057259833431386825
+  can: 0.028629916715693413
+  car: 0.028629916715693413
+  carmen: 0.028629916715693413
+  carols: 0.028629916715693413
+  cecil: 0.028629916715693413
+  century: 0.028629916715693413
+  chieftain: 0.028629916715693413
+  christmas: 0.028629916715693413
+  clean: 0.028629916715693413
+  colonel: 0.028629916715693413
+  concerned: 0.028629916715693413
+  contains: 0.028629916715693413
+  cotton: 0.028629916715693413
+  country: 0.028629916715693413
+  couple: 0.028629916715693413
+  creative: 0.028629916715693413
+  crichton: 0.028629916715693413
+  crude: 0.028629916715693413
+  day: 0.028629916715693413
+  director: 0.028629916715693413
+  earth: 0.028629916715693413
+  end: 0.028629916715693413
+  entered: 0.028629916715693413
+  equally: 0.028629916715693413
+  even: 0.028629916715693413
+  exited: 0.028629916715693413
+  failures: 0.028629916715693413
+  father: 0.028629916715693413
+  field: 0.057259833431386825
+  for: 0.057259833431386825
+  force: 0.028629916715693413
+  forest: 0.028629916715693413
+  forward: 0.028629916715693413
+  fossils: 0.057259833431386825
+  freaks: 0.028629916715693413
+  friend: 0.028629916715693413
+  from: 0.028629916715693413
+  future: 0.028629916715693413
+  get: 0.028629916715693413
+  giants: 0.028629916715693413
+  gives: 0.028629916715693413
+  greatness: 0.028629916715693413
+  greek: 0.028629916715693413
+  ground: 0.028629916715693413
+  have: 0.028629916715693413
+  he: 0.11451966686277365
+  his: 0.14314958357846708
+  hounds: 0.028629916715693413
+  huntsman: 0.028629916715693413
+  idea: 0.028629916715693413
+  illustration: 0.028629916715693413
+  in: 0.17177950029416048
+  institution: 0.028629916715693413
+  jenn: 0.028629916715693413
+  keen: 0.028629916715693413
+  kruger: 0.028629916715693413
+  larger: 0.028629916715693413
+  leggings: 0.028629916715693413
+  lengthy: 0.028629916715693413
+  library: 0.028629916715693413
+  like: 0.028629916715693413
+  little: 0.028629916715693413
+  lived: 0.028629916715693413
+  lori: 0.028629916715693413
+  lusus: 0.028629916715693413
+  manuscriptal: 0.028629916715693413
+  maybe: 0.028629916715693413
+  medieval: 0.028629916715693413
+  mythical: 0.028629916715693413
+  name: 0.028629916715693413
+  naturae: 0.028629916715693413
+  nature: 0.028629916715693413
+  not: 0.028629916715693413
+  noticed: 0.028629916715693413
+  notion: 0.028629916715693413
+  notions: 0.028629916715693413
+  occupied: 0.028629916715693413
+  of: 0.42944875073540123
+  oliver: 0.028629916715693413
+  on: 0.057259833431386825
+  or: 0.14314958357846708
+  origin: 0.028629916715693413
+  painting: 0.028629916715693413
+  park: 0.028629916715693413
+  pastimes: 0.028629916715693413
+  pedestal: 0.028629916715693413
+  prepared: 0.028629916715693413
+  president: 0.028629916715693413
+  protectorate: 0.028629916715693413
+  pulled: 0.028629916715693413
+  pursuing: 0.028629916715693413
+  pygmies: 0.028629916715693413
+  races: 0.028629916715693413
+  railway: 0.028629916715693413
+  real: 0.028629916715693413
+  recognition: 0.028629916715693413
+  red: 0.028629916715693413
+  remains: 0.028629916715693413
+  represented: 0.057259833431386825
+  representing: 0.028629916715693413
+  rhodes: 0.028629916715693413
+  right: 0.028629916715693413
+  rodin: 0.028629916715693413
+  saxon: 0.028629916715693413
+  second: 0.028629916715693413
+  see: 0.028629916715693413
+  shower: 0.028629916715693413
+  smaller: 0.028629916715693413
+  socks: 0.028629916715693413
+  some: 0.028629916715693413
+  sports: 0.28629916715693415
+  spout: 0.028629916715693413
+  statue: 0.028629916715693413
+  strutt: 0.028629916715693413
+  stuff: 0.057259833431386825
+  successor: 0.028629916715693413
+  swine: 0.028629916715693413
+  taken: 0.028629916715693413
+  talk: 0.028629916715693413
+  thankfully: 0.028629916715693413
+  that: 0.11451966686277365
+  the: 0.486708584166788
+  there: 0.028629916715693413
+  they: 0.057259833431386825
+  till: 0.028629916715693413
+  to: 0.057259833431386825
+  too: 0.028629916715693413
+  town: 0.028629916715693413
+  trivia: 0.028629916715693413
+  trouble: 0.028629916715693413
+  was: 0.08588975014708024
+  way: 0.028629916715693413
+  we: 0.028629916715693413
+  were: 0.057259833431386825
+  western: 0.028629916715693413
+  who: 0.028629916715693413
+  wild: 0.028629916715693413
+  with: 0.057259833431386825
+  within: 0.028629916715693413
+  yard: 0.028629916715693413
+  yeomanry: 0.028629916715693413
