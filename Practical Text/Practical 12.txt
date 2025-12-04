@@ -1,0 +1,137 @@
+Aim:  Develop a program to implement the Viola-Jones algorithm for 
+detecting faces from video.
+
+THEORY: 
+
+The Viola-Jones algorithm, pioneered by Paul Viola and Michael Jones in 2001, revolutionized 
+the field of face detection. Its efficient and robust methodology opened doors to a wide range of 
+applications that rely on accurately identifying and analyzing human faces. By harnessing the power of 
+Haar-like features, integral images, machine learning, and cascades of classifiers, the Viola-Jones 
+algorithm showcases the synergy between computer science and image processing. 
+The Viola-Jones algorithm is a landmark object detection method known for achieving high detection rates 
+with minimal computational cost, enabling real-time operation. It consists of four key concepts: 
+The Viola Jones algorithm has four main steps, which we shall discuss in the sections to follow: 
+1. Selecting Haar-like features 
+2. Creating an integral image 
+3. Running AdaBoost training 
+4. Creating classifier cascades 
+
+1. Haar-like Features 
+These are simple rectangular features that capture contrast changes in an image. They are analogous to 
+Haar wavelets and are used because human faces exhibit universal properties, such as: 
+• The eye region is darker than the cheek region. 
+• The bridge of the nose is brighter than the eye regions. A Haar-like feature calculates a value by 
+taking the sum of pixels in the dark areas and subtracting the sum of pixels in the light areas. 
+
+2. Integral Image 
+This is a pre-computation step that allows the sum of pixels within any rectangular region to be calculated 
+in constant time (only four array accesses), regardless of the rectangle's size. This dramatically speeds up 
+the calculation of the thousands of possible Haar-like features across an image. 
+
+3. AdaBoost (Adaptive Boosting) 
+AdaBoost is a machine learning algorithm used to select a small, critical set of "strong classifiers" from 
+a very large pool of weak classifiers (each corresponding to a single Haar-like feature). It focuses the 
+learning process on the most challenging examples, creating a highly accurate combined classifier using 
+only the most important features. 
+
+4. Cascade of Classifiers 
+The final, most critical component for speed. The strong classifier is organized into a cascade (a series of 
+stages). 
+• Early Stages use a small number of simple features to quickly eliminate most non-face regions. 
+• Later Stages use more complex features and are only applied to regions that passed the previous 
+stages. This structure ensures that the majority of an image's sub-regions are instantly discarded as 
+"non-face," allowing the system to achieve processing speeds necessary for real-time video 
+analysis.
+
+
+
+
+
+
+Code:
+
+import cv2
+import os
+
+# === Initialization (Step 1) ===
+cascPathFace = os.path.join(cv2.data.haarcascades, "haarcascade_frontalface_alt2.xml")
+cascPathEyes = os.path.join(cv2.data.haarcascades, "haarcascade_eye_tree_eyeglasses.xml")
+
+faceCascade = cv2.CascadeClassifier(cascPathFace)
+eyeCascade = cv2.CascadeClassifier(cascPathEyes)
+
+# Video input (Step 2)
+video_path = "People.mp4"
+cap = cv2.VideoCapture(video_path)
+if not cap.isOpened():
+    print(f"Error: Could not open video file '{video_path}'")
+    exit()
+
+# Optional: prepare writer to save output
+save_output = False
+out_writer = None
+if save_output:
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+    fps = cap.get(cv2.CAP_PROP_FPS) or 25.0
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    out_writer = cv2.VideoWriter('output_with_detections.mp4', fourcc, fps, (width, height))
+
+# Read frame loop (Step 3)
+while True:
+    ret, frame = cap.read()
+    if not ret:
+        # End of video or read error (Step 9)
+        print("End of video or cannot read frame.")
+        break
+
+    # Optional: resize frame if you want faster processing
+    # frame = cv2.resize(frame, (0,0), fx=0.75, fy=0.75)
+
+    # Pre-processing (Step 4): convert to grayscale
+    gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+    # Detection (Step 5): detect faces
+    faces = faceCascade.detectMultiScale(
+        gray,
+        scaleFactor=1.1,
+        minNeighbors=5,
+        minSize=(60, 60),
+        flags=cv2.CASCADE_SCALE_IMAGE
+    )
+
+    # Output processing & drawing (Steps 6 & 7)
+    for (x, y, w, h) in faces:
+        # draw face rectangle
+        cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+
+        # Prepare ROI for eye detection in grayscale (important!)
+        faceGray = gray[y:y + h, x:x + w]
+        faceColor = frame[y:y + h, x:x + w]
+
+        # detect eyes inside face ROI — use grayscale ROI
+        eyes = eyeCascade.detectMultiScale(faceGray, scaleFactor=1.1, minNeighbors=3, minSize=(15, 15))
+
+        # draw eyes
+        for (ex, ey, ew, eh) in eyes:
+            eye_center = (x + ex + ew // 2, y + ey + eh // 2)
+            radius = int(round((ew + eh) * 0.25))
+            cv2.circle(frame, eye_center, radius, (255, 0, 0), 2)
+
+    # Display frame (Step 8)
+    cv2.imshow('Viola-Jones: Face & Eyes', frame)
+
+    # Optionally save output frame
+    if save_output and out_writer is not None:
+        out_writer.write(frame)
+
+    # Use a short delay; can set based on video fps if desired
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        print("Interrupted by user.")
+        break
+
+# Cleanup (Step 10)
+cap.release()
+if out_writer is not None:
+    out_writer.release()
+cv2.destroyAllWindows()

@@ -1,0 +1,115 @@
+Aim: Write programs to apply different filter on given image using 
+OpenCV 
+i Averaging Filter ii. Gaussian Filter iii. Median Filter iv. Bilateral Filter. 
+
+
+THEORY: 
+ 
+Neighborhood processing in spatial domain:  
+To modify one pixel, we consider values of the immediate neighboring pixels also. For this purpose, 
+3X3, 5X5, or 7X7 neighborhood mask can be considered. An example of a 3X3 mask is shown 
+below. 
+f(x-1, y-1) f(x-1, y) f(x-1, y+1) 
+f(x, y-1) f(x, y) f(x, y+1) 
+f(x+1, y-1) f(x+1, y) f(x+1, y+1) 
+Low Pass filtering:  
+It is also known as the smoothing filter. It removes the high-frequency content from the image. It is 
+also used to blur an image. A low pass averaging filter mask is as shown. 
+1/9 1/9 1/9 
+1/9 1/9 1/9 
+1/9 1/9 1/9 
+High Pass Filtering:  
+It eliminates low-frequency regions while retaining or enhancing the high-frequency components. A 
+high pass filtering mask is as shown.
+
+-1/9 -1/9 -1/9 
+-1/9 8/9 -1/9 
+-1/9 -1/9 -1/9 
+
+2D Convolution (Image Filtering) 
+As in one-dimensional signals, images also can be filtered with various low-pass filters (LPF), high
+pass filters (HPF), etc. LPF helps in removing noise, blurring images, etc. HPF filters help in finding 
+edges in images. 
+ 
+OpenCV provides a function cv.filter2D() to convolve a kernel with an image. As an example, we 
+will try an averaging filter on an image. A 5x5 averaging filter kernel will look like the below: 
+
+Implementation in OpenCV: 
+These are the most commonly used OpenCV image smoothing filters- 
+● Averaging Filter 
+● Gaussian Filter 
+● Median Filter 
+● Bilateral Filter 
+● Averaging Filter 
+Average (or mean) filtering is a method of 'smoothing' images by reducing the amount of 
+intensity variation between neighbouring pixels. The average filter works by moving through 
+the image pixel by pixel, replacing each value with the average value of neighbouring pixels, 
+including itself.                                                                              
+             
+The Averaging Filter technique takes the average of all the pixels under the kernel area and 
+replaces the central element. The functions cv2.blur() and cv2.boxFilter() can be used to 
+perform the averaging filter. Both functions smooth an image using the kernel.   
+ 
+Syntax of cv2.blur() 
+cv2.blur(image, ksize) 
+  
+Here, the image is the image source, and ksize is the size of blurring kernel. 
+ 
+Syntax of cv2.boxFilter() 
+cv2.boxFilter(src, dst, depth, ksize, anchor, normalize, bordertype) 
+In this function , the src is the image source, dst is the destination image of the same size, 
+and depth denotes the output image depth. The anchor denotes the anchor points. By default, 
+it is at the kernel point (cordinate (-1,1)). The ksize is the size of blurring kernel and 
+normalize is the flag which specifies whether the kernel should be normalized or not. The 
+bordertype is an integer object that represents the type of the border used. 
+
+
+
+CODE:
+
+#Averaging Filter
+import cv2
+import numpy as np
+img = cv2.imread("D:\\PyCharm\\Practical 4\\Ice Cream.jpg")
+im1 = cv2.blur(img, (5, 5))
+im2 = cv2.boxFilter(img, -1, (2, 2), normalize=True)
+cv2.imshow('images', cv2.resize(np.hstack((im1, im2)), (600, 300)))
+cv2.waitKey(0)
+cv2.destroyAllWindows()
+
+
+#Gaussian Filter
+import cv2
+import numpy
+#using imread()
+img = cv2.imread("D:\PyCharm\Practical 4\Ice Cream.jpg")
+dst = cv2.GaussianBlur(img, (5,5), cv2.BORDER_DEFAULT)
+cv2.imshow('image', cv2.resize(numpy.hstack((img,dst)), (600, 300)))
+cv2.waitKey(0);
+cv2.destroyAllWindows();
+
+
+#Median Filter
+import cv2
+import numpy
+#using imread()
+img = cv2.imread("D:\PyCharm\Practical 4\Ice Cream.jpg")
+dst = cv2.medianBlur(img, 7)
+cv2.imshow('image', cv2.resize(numpy.hstack((img,dst)), (600, 300)))
+cv2.waitKey(0);
+cv2.destroyAllWindows();
+cv2.waitKey(1)
+
+
+#Biletral Filter
+import cv2
+import numpy
+#using imread()
+img = cv2.imread("D:\PyCharm\Practical 4\Ice Cream.jpg")
+dst = cv2.bilateralFilter(img, -1, 5, 5)
+cv2.imshow('image', cv2.resize(numpy.hstack((img, dst)), (600, 300)))
+cv2.waitKey(0);
+cv2.destroyAllWindows();
+cv2.waitKey(1)
+
+

@@ -1,0 +1,117 @@
+Aim: Implement programs to Analyse following feature detection 
+techniques using OpenCv library. 
+a) Hough Transform   b) Scale Invariant Scale detection (SIFT). 
+
+
+THEORY: 
+ 
+The Hough transform is a technique which can be used to isolate features of a particular shape 
+within an image. Because it requires that the desired features be specified in some parametric 
+form, the classical Hough transform is most commonly used for the detection of regular curves 
+such as lines, circles, ellipses, etc. A generalized Hough transform can be employed in 
+applications where a simple analytic description of a feature(s) is not possible. Due to the 
+computational complexity of the generalized Hough algorithm, we restrict the main focus of this 
+discussion to the classical Hough transform. Despite its domain restrictions, the classical Hough 
+transform (hereafter referred to without the classical prefix) retains many applications, as most 
+manufactured parts (and many anatomical parts investigated in medical imagery) contain feature 
+boundaries which can be described by regular curves. The main advantage of the Hough 
+transform technique is that it is tolerant of gaps in feature boundary descriptions and is relatively 
+unaffected by image noise. 
+ 
+Working: 
+The Hough technique is particularly useful for computing a global description of a feature(s) 
+(where the number of solution classes need not be known a priori), given (possibly noisy) local 
+measurements. The motivating idea behind the Hough technique for line detection is that each 
+input measurement (e.g. coordinate point) indicates its contribution to a globally consistent 
+solution (e.g. the physical line which gave rise to that image point). 
+As a simple example, consider the common problem of fitting a set of line segments to a set of 
+discrete image points (e.g., pixel locations output from an edge detector). Figure 1 shows some 
+possible solutions to this problem. Here the lack of a priori knowledge about the number of 
+desired line segments (and the ambiguity about what constitutes a line segment) render this 
+problem under-constrained.
+
+we can analytically describe a line segment in a number of forms. However, a convenient equation 
+for describing a set of lines uses parametric or normal notion: 
+ 
+where r is the length of a normal from the origin to this line and Θ is the orientation of r with respect 
+to the X-axis. (See Figure 2.) For any point on this line, r and Θ are constant.
+
+
+a. Scale Invariant Scale detection. 
+The scale-invariant feature transform (SIFT) is a computer vision algorithm to detect, describe, and 
+match local features in images, invented by David Lowe in 1999. Applications include object 
+recognition, robotic mapping and navigation, image stitching, 3D modeling, gesture recognition, 
+video tracking, individual identification of wildlife and match moving. 
+SIFT key points of objects are first extracted from a set of reference images and stored in a database. 
+An object is recognized in a new image by individually comparing each feature from the new image 
+to this database and finding candidate matching features based on Euclidean distance of their feature 
+vectors. From the full set of matches, subsets of key points that agree on the object and its location, 
+scale, and orientation in the new image are identified to filter out good matches. The determination 
+of consistent clusters is performed rapidly by using an efficient hash table implementation of the 
+generalized Hough transform. 
+Each cluster of 3 or more features that agree on an object and its pose is then subject to further 
+detailed model verification and subsequently outliers are discarded. Finally, the probability that a 
+particular set of features indicates the presence of an object is computed, given the accuracy of fit 
+and number of probable false matches. Object matches that pass all these tests can be identified as 
+correct with high confidence.
+
+
+
+
+
+Code:
+
+#Hough Transform
+import numpy as np
+import matplotlib.pyplot as plt
+from skimage.feature import hog
+from skimage import io, color, exposure
+import os
+def apply_hog(image_path):
+    print("starting HOG feature Extraction...")
+    image= io.imread(image_path,as_gray=True)
+    print("Original image shape",image.shape)
+    fd, hog_image =hog(
+        image,
+        orientations= 9,
+        pixels_per_cell = (8,8),
+        cells_per_block= (2,2),
+        transform_sqrt= True,
+        block_norm= 'L2-Hys',
+        visualize = True
+    )
+    print("HOG feature vector dimension:", fd.shape)
+    fig,(ax1,ax2)= plt.subplots(1,2, figsize=(10,5), sharex=True, sharey= True)
+    ax1.axis('off')
+    ax1.imshow(image,cmap=plt.cm.gray)
+    ax1.set_title('Original Image')
+    hog_image_rescaled= exposure.rescale_intensity(hog_image,in_range=(0,10))
+    ax2.axis('off')
+    ax2.imshow(hog_image_rescaled, cmap= plt.cm.gray)
+    ax2.set_title('histogram of Oriented Gradients')
+    plt.tight_layout()
+    plt.show()
+    print("HoG Features extraction")
+user_image_path = "D:\\PyCharm\\Practical 7\\Lines.jpg"
+apply_hog(user_image_path)
+
+
+
+
+#Scale Invariant Scale detection(SIFT)
+import cv2
+import numpy as np
+import matplotlib as plt
+
+img1=cv2.imread('D:\\PyCharm\\Practical 7\\images.jfif')
+img2=cv2.imread('D:\\PyCharm\\Practical 7\\img1.jfif')
+orb=cv2.ORB_create()
+kp1,des1=orb.detectAndCompute(img1,None)
+kp2,des2=orb.detectAndCompute(img2,None)
+bf=cv2.BFMatcher(cv2.NORM_HAMMING,crossCheck=True)
+matches = bf.match(des1,des2)
+matches=sorted(matches,key=lambda x:x.distance)
+img3=cv2.drawMatches(img1,kp1,img2,kp2,matches[:15], None,flags=2)
+cv2.imshow("matching",img3)
+cv2.waitKey()
+cv2.destroyAllWindows()

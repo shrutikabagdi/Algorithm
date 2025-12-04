@@ -1,0 +1,296 @@
+Aim: Design and Implementation of a Background Subtraction System 
+Robust to Lighting Changes, Shadows, and Dynamic Scenes. 
+
+THEORY: 
+ 
+1.Background Subtraction 
+Background subtraction is a fundamental technique in computer vision for detecting moving 
+objects in video sequences. It models the background and classifies pixels that deviate significantly 
+as foreground. 
+• MOG2 (Mixture of Gaussians 2): Each pixel is modeled as a mixture of Gaussians to 
+capture variations (e.g., moving leaves). Foreground is detected when pixel values deviate 
+from the dominant Gaussian distribution. 
+• Parameters: 
+o history: number of frames considered in the background model. 
+o varThreshold: sensitivity to differences between foreground and background. 
+o detectShadows: whether to classify soft differences as shadows (value 127 in mask). 
+
+2. Illumination Normalization (CLAHE) 
+Lighting variations affect detection accuracy. Contrast Limited Adaptive Histogram 
+Equalization (CLAHE) enhances local contrast by applying histogram equalization on small tiles 
+in the image. 
+• Applied on the V (brightness) channel in HSV color space. 
+• Prevents over-amplification of noise. 
+• Helps maintain stable background/foreground separation under changing light conditions. 
+
+3. Shadow Detection and Removal 
+Shadows are often misclassified as foreground. To address this: 
+1. MOG2 built-in shadow detection: Shadows are labeled as 127 in the mask. 
+2. HSV-based heuristic filter: Shadows usually have lower intensity (V channel) but similar 
+hue and saturation. A threshold on relative brightness is used to remove dark regions 
+incorrectly classified as objects. 
+
+4. Postprocessing 
+Foreground masks contain noise (small blobs, holes). To refine masks: 
+• Median Blur: Removes salt-and-pepper noise. 
+• Morphological Opening: Removes small false positives. 
+• Morphological Closing: Fills small holes inside detected objects. 
+• Thresholding: Ensures binary mask (0 for background, 255 for foreground).
+
+5 Contour Analysis 
+Contours of connected regions are extracted from the cleaned mask. Small contours (area < 
+threshold) are removed. Bounding boxes are drawn around valid objects for visualization. 
+• Provides object locations and approximate sizes. 
+• Useful for object tracking and higher-level tasks.
+ 
+6 Performance Evaluation 
+The system performance is evaluated qualitatively (visual results) and quantitatively (frames per 
+second). 
+• Visualization: Overlays bounding boxes and translucent masks on video frames. 
+• Efficiency: FPS is displayed to monitor real-time capability.
+
+
+
+
+
+
+
+Code:
+
+"""
+foreground_extractor.py
+
+Robust foreground / background separation for video sequences.
+- Use a video file or webcam.
+- Uses MOG2 background subtractor with shadow detection,
+  brightness normalization (CLAHE), morphological postprocessing,
+  and contour filtering to extract moving objects robustly.
+
+Usage:
+- Put this file in your PyCharm project.
+- Edit the CONFIG section (video source, thresholds) as needed.
+- Run the script. Output videos will be saved next to the script.
+
+Author: ChatGPT (example)
+"""
+
+import cv2
+import numpy as np
+import os
+import time
+
+# -----------------------------
+# CONFIG: change these settings
+# -----------------------------
+VIDEO_SOURCE = "Demo 1.mp4"   # Path to video file, or 0 for webcam
+OUTPUT_PREFIX = "output"     # prefix for saved outputs
+WRITE_OUTPUT = True          # write result video and mask video
+SHOW_WINDOW = True           # show real-time window (set False for headless)
+MIN_CONTOUR_AREA = 900       # minimum area in pixels to consider as object (tune this)
+CLAHE_ENABLED = True         # enable CLAHE on V channel for illumination robustness
+CLAHE_CLIP = 3.0             # CLAHE clip limit
+CLAHE_TILE = (8, 8)          # CLAHE tile grid size
+MOG_HISTORY = 500            # history length for background model
+MOG_VAR_THRESHOLD = 16       # threshold on squared Mahalanobis distance to decide background/foreground
+MOG_DETECT_SHADOWS = True    # set True to let MOG2 detect shadows (value 127 in mask)
+SHADOW_REMOVE = True         # if True, remove MOG2 shadow pixels (recommended)
+USE_HSV_SHADOW_FILTER = True # additional HSV-based shadow filter (helps in some scenes)
+KERNEL_OPEN = (3, 3)         # kernel for morphological opening
+KERNEL_CLOSE = (11, 11)      # kernel for morphological closing (fill holes)
+MEDIAN_BLUR_KSIZE = 5        # median blur on mask (odd number)
+MAX_OUTPUT_FPS = 30          # cap output fps to reasonable number if video has higher fps
+# -----------------------------
+
+def init_video_capture(source):
+    """Initialize cv2.VideoCapture, accepting numeric strings and ints for webcam."""
+    try:
+        src = int(source)
+    except Exception:
+        src = source
+    cap = cv2.VideoCapture(src)
+    if not cap.isOpened():
+        raise RuntimeError(f"Cannot open video source: {source}")
+    return cap
+
+def clahe_equalize_bgr(frame_bgr, clip=3.0, tile=(8,8)):
+    """
+    Apply CLAHE to the V channel of the frame in HSV space.
+    This improves robustness to gradual illumination changes.
+    """
+    hsv = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2HSV)
+    h, s, v = cv2.split(hsv)
+    clahe = cv2.createCLAHE(clipLimit=clip, tileGridSize=tile)
+    v_eq = clahe.apply(v)
+    hsv_eq = cv2.merge((h, s, v_eq))
+    bgr_eq = cv2.cvtColor(hsv_eq, cv2.COLOR_HSV2BGR)
+    return bgr_eq
+
+def remove_shadows_by_hsv(frame_bgr, mask):
+    """
+    Optional additional shadow removal:
+    If a pixel is marked foreground in mask, check HSV V ratio vs background color
+    (approximation): shadows typically lower V but similar H and S. This is a simple heuristic.
+    Here we remove pixels with very low V (too dark) relative to mean V of frame.
+    """
+    hsv = cv2.cvtColor(frame_bgr, cv2.COLOR_BGR2HSV)
+    v = hsv[:, :, 2].astype(np.float32)
+    mean_v = np.mean(v)
+    # threshold: if pixel V much lower than mean, likely shadow (tunable)
+    shadow_thresh = mean_v * 0.65
+    shadow_pixels = (v < shadow_thresh)
+    new_mask = mask.copy()
+    new_mask[shadow_pixels == True] = 0
+    return new_mask
+
+def postprocess_mask(raw_mask):
+    """
+    Clean up foreground mask:
+    - remove shadows (MOG2 marks them as 127)
+    - median blur
+    - morphological opening to remove noise (small dots)
+    - morphological closing to fill holes
+    - final threshold to binary
+    """
+    # Remove MOG2 shadow label if present (127)
+    mask = raw_mask.copy()
+    mask[mask == 127] = 0
+
+    # Median blur to remove salt-and-pepper noise
+    if MEDIAN_BLUR_KSIZE > 1:
+        mask = cv2.medianBlur(mask, MEDIAN_BLUR_KSIZE)
+
+    # Morphological opening then closing
+    kernel_open = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, KERNEL_OPEN)
+    kernel_close = cv2.getStructuringElement(cv2.MORPH_ELLIPSE, KERNEL_CLOSE)
+
+    mask = cv2.morphologyEx(mask, cv2.MORPH_OPEN, kernel_open, iterations=1)
+    mask = cv2.morphologyEx(mask, cv2.MORPH_CLOSE, kernel_close, iterations=1)
+
+    # Ensure binary mask (0 or 255)
+    _, mask = cv2.threshold(mask, 127, 255, cv2.THRESH_BINARY)
+
+    return mask
+
+def filter_contours_and_draw(frame, mask, min_area=900):
+    """
+    Find contours in mask, filter by area, draw bounding boxes on frame,
+    and return a list of bounding boxes and per-object masks.
+    """
+    contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    bboxes = []
+    object_masks = []
+    for cnt in contours:
+        area = cv2.contourArea(cnt)
+        if area < min_area:
+            continue
+        x, y, w, h = cv2.boundingRect(cnt)
+        bboxes.append((x, y, w, h))
+        # extract object mask (tight bbox)
+        obj_mask = np.zeros_like(mask)
+        cv2.drawContours(obj_mask, [cnt], -1, 255, -1)  # filled contour
+        object_masks.append((x, y, w, h, obj_mask[y:y+h, x:x+w].copy()))
+        # draw bbox and area on frame
+        cv2.rectangle(frame, (x, y), (x+w, y+h), (0, 180, 255), 2)
+        cv2.putText(frame, f"A:{int(area)}", (x, y-6), cv2.FONT_HERSHEY_SIMPLEX, 0.45, (0, 180, 255), 1)
+    return frame, bboxes, object_masks
+
+def main():
+    # Prepare capture and metadata
+    cap = init_video_capture(VIDEO_SOURCE)
+    fps = cap.get(cv2.CAP_PROP_FPS) or MAX_OUTPUT_FPS
+    fps_out = min(fps, MAX_OUTPUT_FPS)
+    width = int(cap.get(cv2.CAP_PROP_FRAME_WIDTH))
+    height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+
+    # Initialize background subtractor (MOG2)
+    backsub = cv2.createBackgroundSubtractorMOG2(history=MOG_HISTORY,
+                                                 varThreshold=MOG_VAR_THRESHOLD,
+                                                 detectShadows=MOG_DETECT_SHADOWS)
+
+    # Output writers
+    out_vis = None
+    out_mask = None
+    if WRITE_OUTPUT:
+        out_vis_path = f"{OUTPUT_PREFIX}_vis.mp4"
+        out_mask_path = f"{OUTPUT_PREFIX}_mask.mp4"
+        out_vis = cv2.VideoWriter(out_vis_path, fourcc, fps_out, (width, height))
+        out_mask = cv2.VideoWriter(out_mask_path, fourcc, fps_out, (width, height), isColor=False)
+        print(f"[INFO] Writing visual output to: {out_vis_path}")
+        print(f"[INFO] Writing mask output to:   {out_mask_path}")
+
+    frame_idx = 0
+    t_start = time.time()
+
+    try:
+        while True:
+            ret, frame = cap.read()
+            if not ret:
+                print("[INFO] End of video stream.")
+                break
+            frame_idx += 1
+
+            # Optional illumination equalization to handle global lighting changes
+            proc_frame = frame
+            if CLAHE_ENABLED:
+                proc_frame = clahe_equalize_bgr(frame, clip=CLAHE_CLIP, tile=CLAHE_TILE)
+
+            # Apply background subtractor to get raw foreground mask
+            raw_mask = backsub.apply(proc_frame)
+
+            # Optionally remove shadows marked by MOG2 (value 127)
+            if SHADOW_REMOVE:
+                raw_mask[raw_mask == 127] = 0
+
+            # Optional additional HSV-based shadow filtering (heuristic)
+            if USE_HSV_SHADOW_FILTER:
+                raw_mask = remove_shadows_by_hsv(proc_frame, raw_mask)
+
+            # Postprocess (median blur, morphological ops, threshold)
+            clean_mask = postprocess_mask(raw_mask)
+
+            # Filter contours by area and draw bounding boxes on copy of original frame
+            vis_frame = frame.copy()
+            vis_frame, bboxes, object_masks = filter_contours_and_draw(vis_frame, clean_mask, min_area=MIN_CONTOUR_AREA)
+
+            # Overlay mask (translucent) on visualization for clarity
+            colored_mask = cv2.cvtColor(clean_mask, cv2.COLOR_GRAY2BGR)
+            overlay = vis_frame.copy()
+            alpha = 0.45
+            overlay[colored_mask[:,:,0] > 0] = (0, 255, 0)  # green overlay for foreground pixels
+            cv2.addWeighted(overlay, alpha, vis_frame, 1 - alpha, 0, vis_frame)
+
+            # Display detection count and FPS
+            fps_so_far = frame_idx / (time.time() - t_start + 1e-6)
+            cv2.putText(vis_frame, f"Detections: {len(bboxes)}", (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 1)
+            cv2.putText(vis_frame, f"FPS: {fps_so_far:.1f}", (10, 45), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255,255,255), 1)
+
+            # Show windows
+            if SHOW_WINDOW:
+                cv2.imshow("Foreground - Visualization", vis_frame)
+                cv2.imshow("Foreground - Mask", clean_mask)
+
+            # Write outputs
+            if WRITE_OUTPUT and out_vis is not None:
+                out_vis.write(vis_frame)
+                # out_mask expects single channel frame; convert to grayscale frame with 0/255
+                out_mask.write(clean_mask)
+
+            # Keyboard handling (press ESC to quit)
+            key = cv2.waitKey(1) & 0xFF
+            if key == 27:
+                print("[INFO] Interrupted by user (ESC).")
+                break
+
+    finally:
+        cap.release()
+        if out_vis:
+            out_vis.release()
+        if out_mask:
+            out_mask.release()
+        cv2.destroyAllWindows()
+        elapsed = time.time() - t_start
+        print(f"[INFO] Done. Processed {frame_idx} frames in {elapsed:.2f}s ({frame_idx/elapsed if elapsed>0 else 0:.2f} FPS).")
+
+if __name__ == "__main__":
+    main()
